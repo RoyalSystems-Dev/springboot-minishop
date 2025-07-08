@@ -2,7 +2,8 @@
 
 Demo de Mini Shop.
 
-## curl
+
+## curl products
 
 ```sh
 # Obtener todos los productos
@@ -19,4 +20,33 @@ curl -X PUT http://localhost:8082/products/1 -H "Content-Type: application/json"
 
 # Eliminar un producto
 curl -X DELETE http://localhost:8082/products/1
+```
+
+
+## curl orders
+
+```sh
+# Obtener todas las órdenes
+curl http://localhost:8081/orders
+
+# Obtener orden específica
+curl http://localhost:8081/orders/1
+
+# Crear nueva orden
+curl -X POST http://localhost:8081/orders -H "Content-Type: application/json" -d '{
+  "productName": "Laptop",
+  "quantity": 2
+}'
+
+# Actualizar orden
+curl -X PUT http://localhost:8081/orders/1 -H "Content-Type: application/json" -d '{
+  "productName": "Updated Product",
+  "quantity": 5
+}'
+
+# Buscar órdenes por producto
+curl http://localhost:8081/orders/product/Product-1
+
+# Eliminar orden
+curl -X DELETE http://localhost:8081/orders/1
 ```
