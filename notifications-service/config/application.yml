@@ -17,8 +17,3 @@ spring:
                 stream:
                   nats:
                     servers: nats://nats:4222
-
-      bindings:
-        orderCreated-in-0:
-          destination: order.created
-          content-type: application/json
