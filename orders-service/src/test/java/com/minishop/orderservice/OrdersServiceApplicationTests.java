@@ -1,4 +1,4 @@
-package com.minishop.orders_service;
+package com.minishop.orderservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

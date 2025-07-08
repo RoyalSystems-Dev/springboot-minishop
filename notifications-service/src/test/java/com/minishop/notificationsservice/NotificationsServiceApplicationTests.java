@@ -1,4 +1,4 @@
-package com.minishop.notifications_service;
+package com.minishop.notificationsservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
