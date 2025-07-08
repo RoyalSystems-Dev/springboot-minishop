@@ -1,0 +1,24 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: notifications-service
+
+  cloud:
+    stream:
+      default-binder: nats
+      binders:
+        nats:
+          type: nats
+          environment:
+            spring:
+              cloud:
+                stream:
+                  nats:
+                    servers: nats://nats:4222
+
+      bindings:
+        orderCreated-in-0:
+          destination: order.created
+          content-type: application/json
