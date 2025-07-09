@@ -421,3 +421,63 @@ docker-compose up -d
 docker-compose logs -f
 docker-compose down
 ```
+
+---
+
+## 🔧 **Configuración Puerto Alternativo (8088)**
+
+### **Escenario: Nginx ya existe en puerto 80**
+
+Si tu servidor ya tiene un Nginx corriendo en el puerto 80, Mini-Shop puede usar el puerto 8088:
+
+```yaml
+# docker-compose.vpn.yml
+services:
+  nginx:
+    ports:
+      - "0.0.0.0:8088:80"    # Puerto externo 8088, interno 80
+```
+
+### **Comandos para puerto 8088:**
+
+```bash
+# Usar configuración VPN (puerto 8088)
+docker compose -f docker-compose.vpn.yml up -d
+
+# O usar script automático
+./deploy-vpn.sh
+```
+
+### **Acceso con puerto 8088:**
+
+```bash
+# Acceso local
+curl http://localhost:8088/health
+
+# Acceso desde VPN/DMZ
+curl http://TU_SERVER_IP:8088/health
+```
+
+### **URLs actualizadas:**
+
+- **Portal:** http://TU_SERVER_IP:8088
+- **Orders:** http://TU_SERVER_IP:8088/orders-app
+- **Products:** http://TU_SERVER_IP:8088/products
+- **Notifications:** http://TU_SERVER_IP:8088/notifications-app
+- **H2 Console:** http://TU_SERVER_IP:8088/h2-console
+
+### **Firewall (puerto 8088):**
+
+```bash
+# Habilitar puerto 8088 en lugar de 80
+sudo ufw allow 8088
+sudo ufw allow 8081
+sudo ufw allow 8082
+sudo ufw allow 8083
+sudo ufw allow 8422
+sudo ufw allow 8423
+```
+
+---
+
+¡Con esta configuración evitas conflictos con otros servicios web! 🚀

@@ -1,7 +1,7 @@
 # Makefile para Mini-Shop
 # Simplifica los comandos Docker más comunes
 
-.PHONY: help build up down logs clean dev-up dev-down restart status health
+.PHONY: help build up down logs clean dev-up dev-down restart status health vpn-up vpn-down vpn-logs vpn-status vpn-health vpn-info vpn-restart
 
 # Variables
 COMPOSE_FILE = docker-compose.yml
@@ -20,12 +20,17 @@ NC = \033[0m
 help: ## Mostrar ayuda
 	@echo "$(BLUE)🚀 Mini-Shop - Comandos disponibles:$(NC)"
 	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-15s$(NC) %s\n", $$1, $$2}'
+	@echo "$(YELLOW)📦 Comandos principales:$(NC)"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -v "vpn-" | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-15s$(NC) %s\n", $$1, $$2}'
+	@echo ""
+	@echo "$(YELLOW)🌐 Comandos VPN (puerto 8088):$(NC)"
+	@grep -E '^vpn-[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-15s$(NC) %s\n", $$1, $$2}'
 	@echo ""
 	@echo "$(YELLOW)Ejemplos de uso:$(NC)"
-	@echo "  make build    # Construir y desplegar"
-	@echo "  make logs     # Ver logs en tiempo real"
-	@echo "  make dev-up   # Solo infraestructura para desarrollo"
+	@echo "  make build      # Construir y desplegar (puerto 80)"
+	@echo "  make vpn-up     # Desplegar en VPN (puerto 8088)"
+	@echo "  make logs       # Ver logs en tiempo real"
+	@echo "  make dev-up     # Solo infraestructura para desarrollo"
 
 build: ## Construir servicios Java y crear imágenes Docker
 	@echo "$(BLUE)📦 Construyendo servicios Java...$(NC)"
@@ -143,3 +148,59 @@ quick-restart: ## Restart rápido de un servicio específico
 		3) $(DOCKER_COMPOSE_CMD) restart notifications-service ;; \
 		*) echo "Opción inválida" ;; \
 	esac
+
+# ========================================
+# Comandos VPN/DMZ (Puerto 8088)
+# ========================================
+
+vpn-up: build ## Desplegar en servidor VPN (puerto 8088)
+	@echo "$(BLUE)🚀 Desplegando en configuración VPN (puerto 8088)...$(NC)"
+	$(DOCKER_COMPOSE_CMD) -f docker-compose.vpn.yml up -d
+	@echo "$(GREEN)✅ Servicios VPN desplegados!$(NC)"
+	@make vpn-info
+
+vpn-down: ## Detener servicios VPN
+	@echo "$(BLUE)🛑 Deteniendo servicios VPN...$(NC)"
+	$(DOCKER_COMPOSE_CMD) -f docker-compose.vpn.yml down
+	@echo "$(GREEN)✅ Servicios VPN detenidos$(NC)"
+
+vpn-logs: ## Ver logs de servicios VPN
+	$(DOCKER_COMPOSE_CMD) -f docker-compose.vpn.yml logs -f
+
+vpn-status: ## Ver estado de servicios VPN
+	@echo "$(BLUE)📊 Estado de servicios VPN:$(NC)"
+	$(DOCKER_COMPOSE_CMD) -f docker-compose.vpn.yml ps
+
+vpn-health: ## Verificar health checks VPN (puerto 8088)
+	@echo "$(BLUE)❤️  Verificando health checks VPN...$(NC)"
+	@echo ""
+	@echo "$(YELLOW)NATS (dedicado):$(NC)"
+	@curl -s http://localhost:8423/healthz && echo " ✅" || echo " ❌"
+	@echo "$(YELLOW)Nginx (puerto 8088):$(NC)"
+	@curl -s http://localhost:8088/health && echo " ✅" || echo " ❌"
+	@echo "$(YELLOW)Orders Service:$(NC)"
+	@curl -s http://localhost:8081/actuator/health && echo " ✅" || echo " ❌"
+	@echo "$(YELLOW)Products Service:$(NC)"
+	@curl -s http://localhost:8082/actuator/health && echo " ✅" || echo " ❌"
+	@echo "$(YELLOW)Notifications Service:$(NC)"
+	@curl -s http://localhost:8083/actuator/health && echo " ✅" || echo " ❌"
+
+vpn-info: ## Mostrar información de acceso VPN (puerto 8088)
+	@echo ""
+	@echo "$(GREEN)🌐 Servicios VPN disponibles (Puerto 8088):$(NC)"
+	@echo "  • Portal Principal:      http://localhost:8088"
+	@echo "  • Orders App:           http://localhost:8088/orders-app"
+	@echo "  • Products API:         http://localhost:8088/products"
+	@echo "  • Notifications App:    http://localhost:8088/notifications-app"
+	@echo "  • H2 Console:          http://localhost:8088/h2-console"
+	@echo "  • NATS Monitoring:     http://localhost:8423"
+	@echo ""
+	@echo "$(GREEN)🔍 Health Checks VPN:$(NC)"
+	@echo "  • General:             http://localhost:8088/health"
+	@echo "  • Orders:              http://localhost:8081/actuator/health"
+	@echo "  • Products:            http://localhost:8082/actuator/health"
+	@echo "  • Notifications:       http://localhost:8083/actuator/health"
+	@echo ""
+	@echo "$(YELLOW)💡 Para acceso externo, reemplaza 'localhost' con la IP del servidor$(NC)"
+
+vpn-restart: vpn-down vpn-up ## Reiniciar servicios VPN

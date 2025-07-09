@@ -43,8 +43,8 @@ echo ""
 echo "🌐 Servicios Web:"
 
 # Probar cada servicio
-test_endpoint "http://$VPN_SERVER_IP/" "Portal Principal"
-test_endpoint "http://$VPN_SERVER_IP/health" "Health Check General"
+test_endpoint "http://$VPN_SERVER_IP:8088/" "Portal Principal"
+test_endpoint "http://$VPN_SERVER_IP:8088/health" "Health Check General"
 test_endpoint "http://$VPN_SERVER_IP:8081/actuator/health" "Orders Service"
 test_endpoint "http://$VPN_SERVER_IP:8082/actuator/health" "Products Service"
 test_endpoint "http://$VPN_SERVER_IP:8083/actuator/health" "Notifications Service"
@@ -55,7 +55,7 @@ echo "🔍 Puertos específicos:"
 
 # Verificar puertos con netcat si está disponible
 if command -v nc >/dev/null 2>&1; then
-    ports=(80 8081 8082 8083 8422 8423)
+    ports=(8088 8081 8082 8083 8422 8423)
     for port in "${ports[@]}"; do
         echo -n "🔌 Puerto $port... "
         if nc -z -w3 $VPN_SERVER_IP $port 2>/dev/null; then
@@ -70,14 +70,14 @@ fi
 
 echo ""
 echo "📋 URLs de acceso directo:"
-echo "  • Portal:        http://$VPN_SERVER_IP"
-echo "  • Orders:        http://$VPN_SERVER_IP/orders-app"
-echo "  • Products:      http://$VPN_SERVER_IP/products"
-echo "  • Notifications: http://$VPN_SERVER_IP/notifications-app"
-echo "  • H2 Console:    http://$VPN_SERVER_IP/h2-console"
+echo "  • Portal:        http://$VPN_SERVER_IP:8088"
+echo "  • Orders:        http://$VPN_SERVER_IP:8088/orders-app"
+echo "  • Products:      http://$VPN_SERVER_IP:8088/products"
+echo "  • Notifications: http://$VPN_SERVER_IP:8088/notifications-app"
+echo "  • H2 Console:    http://$VPN_SERVER_IP:8088/h2-console"
 echo "  • NATS Monitor:  http://$VPN_SERVER_IP:8423"
 echo ""
 echo "💡 Si algo falla, verifica:"
 echo "  1. Conectividad VPN"
-echo "  2. Firewall del servidor (puertos 80, 808X, 842X)"
+echo "  2. Firewall del servidor (puertos 8088, 808X, 842X)"
 echo "  3. Que los servicios estén corriendo en el servidor"

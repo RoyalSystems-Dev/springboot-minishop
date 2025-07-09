@@ -21,7 +21,7 @@ Creado `docker-compose.vpn.yml` con:
 services:
   nginx:
     ports:
-      - "0.0.0.0:80:80"      # ✅ Bind a TODAS las interfaces
+      - "0.0.0.0:8088:80"    # ✅ Puerto 8088 (evita conflicto con Nginx existente)
   orders-service:
     ports:
       - "0.0.0.0:8081:8081"  # ✅ Bind a TODAS las interfaces
@@ -82,8 +82,8 @@ cd mini-shop
 # Ping básico
 ping 10.100.88.3
 
-# Servicios web
-curl http://10.100.88.3/health
+# Servicios web (Puerto 8088 para evitar conflicto con Nginx existente)
+curl http://10.100.88.3:8088/health
 curl http://10.100.88.3:8081/actuator/health
 curl http://10.100.88.3:8083/actuator/health
 
@@ -102,7 +102,7 @@ curl http://10.100.88.3:8423/healthz
 sudo ufw status
 
 # Habilitar puertos necesarios
-sudo ufw allow 80          # Nginx
+sudo ufw allow 8088        # Nginx (Mini-Shop - Puerto no conflictivo)
 sudo ufw allow 8081        # Orders Service
 sudo ufw allow 8082        # Products Service  
 sudo ufw allow 8083        # Notifications Service
@@ -121,11 +121,11 @@ Una vez desplegado, desde tu máquina local:
 
 | **Servicio** | **URL** | **Descripción** |
 |--------------|---------|-----------------|
-| **Portal** | http://10.100.88.3 | Página principal |
-| **Orders** | http://10.100.88.3/orders-app | Interfaz de órdenes |
-| **Products** | http://10.100.88.3/products | API de productos |
-| **Notifications** | http://10.100.88.3/notifications-app | Interfaz de notificaciones |
-| **H2 Console** | http://10.100.88.3/h2-console | Base de datos |
+| **Portal** | http://10.100.88.3:8088 | Página principal |
+| **Orders** | http://10.100.88.3:8088/orders-app | Interfaz de órdenes |
+| **Products** | http://10.100.88.3:8088/products | API de productos |
+| **Notifications** | http://10.100.88.3:8088/notifications-app | Interfaz de notificaciones |
+| **H2 Console** | http://10.100.88.3:8088/h2-console | Base de datos |
 | **NATS Monitor** | http://10.100.88.3:8423 | Monitoreo NATS |
 
 ---
@@ -145,7 +145,7 @@ ping 10.100.88.3
 
 ```bash
 # En el servidor, verificar puertos
-sudo netstat -tulpn | grep :80
+sudo netstat -tulpn | grep :8088
 sudo netstat -tulpn | grep :8081
 
 # Verificar Docker
@@ -157,9 +157,9 @@ docker compose -f docker-compose.vpn.yml logs nginx
 
 ```bash
 # Verificar binding
-sudo netstat -tulpn | grep :80
+sudo netstat -tulpn | grep :8088
 
-# Debería mostrar: 0.0.0.0:80, NO 127.0.0.1:80
+# Debería mostrar: 0.0.0.0:8088, NO 127.0.0.1:8088
 ```
 
 ### **4. Firewall bloqueando**
@@ -208,14 +208,14 @@ docker compose -f docker-compose.vpn.yml exec orders-service env | grep SERVER_A
 
 2. **Verificar localmente:**
    ```bash
-   curl localhost/health
+   curl localhost:8088/health
    curl localhost:8081/actuator/health
    ```
 
 3. **Verificar binding:**
    ```bash
-   sudo netstat -tulpn | grep :80
-   # Debe mostrar: 0.0.0.0:80
+   sudo netstat -tulpn | grep :8088
+   # Debe mostrar: 0.0.0.0:8088
    ```
 
 ### **Desde tu Máquina:**
@@ -227,7 +227,7 @@ docker compose -f docker-compose.vpn.yml exec orders-service env | grep SERVER_A
 
 2. **Servicios:**
    ```bash
-   curl http://10.100.88.3/health
+   curl http://10.100.88.3:8088/health
    ```
 
 3. **Script completo:**
@@ -246,7 +246,7 @@ docker compose -f docker-compose.vpn.yml exec orders-service env | grep SERVER_A
 
 ### **Para monitoreo:**
 - NATS: http://10.100.88.3:8423
-- Health checks: http://10.100.88.3/health
+- Health checks: http://10.100.88.3:8088/health
 - Logs individuales: `docker compose -f docker-compose.vpn.yml logs -f [servicio]`
 
 ---
