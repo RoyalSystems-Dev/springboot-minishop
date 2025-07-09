@@ -42,8 +42,16 @@ check_dependencies() {
         exit 1
     fi
     
-    if ! command -v docker-compose &> /dev/null; then
-        print_error "Docker Compose no está instalado"
+    # Verificar Docker Compose (nueva versión integrada o standalone)
+    if docker compose version &> /dev/null; then
+        echo "✅ Usando Docker Compose (integrado): $(docker compose version --short)"
+        DOCKER_COMPOSE_CMD="docker compose"
+    elif command -v docker-compose &> /dev/null; then
+        echo "✅ Usando Docker Compose (standalone): $(docker-compose version --short)"
+        DOCKER_COMPOSE_CMD="docker-compose"
+    else
+        print_error "Docker Compose no está disponible"
+        print_error "Instala Docker Compose o actualiza Docker a una versión que lo incluya"
         exit 1
     fi
     
@@ -58,7 +66,7 @@ check_dependencies() {
 # Limpiar containers anteriores
 cleanup() {
     print_step "Limpiando containers anteriores..."
-    docker-compose down --remove-orphans || true
+    $DOCKER_COMPOSE_CMD down --remove-orphans || true
     docker system prune -f || true
 }
 
@@ -85,8 +93,8 @@ build_services() {
 build_images() {
     print_step "Construyendo imágenes Docker..."
     
-    # Usar docker-compose para build
-    docker-compose build --no-cache
+    # Usar docker compose para build
+    $DOCKER_COMPOSE_CMD build --no-cache
     
     echo "✅ Imágenes Docker construidas exitosamente"
 }
@@ -96,7 +104,7 @@ deploy() {
     print_step "Desplegando servicios..."
     
     # Levantar servicios
-    docker-compose up -d
+    $DOCKER_COMPOSE_CMD up -d
     
     echo "✅ Servicios desplegados exitosamente"
 }
@@ -152,8 +160,8 @@ show_info() {
     echo "  • Notifications:        http://localhost/health/notifications"
     echo ""
     echo "📊 Logs:"
-    echo "  • Ver todos los logs:   docker-compose logs -f"
-    echo "  • Ver logs específicos: docker-compose logs -f [service-name]"
+    echo "  • Ver todos los logs:   $DOCKER_COMPOSE_CMD logs -f"
+    echo "  • Ver logs específicos: $DOCKER_COMPOSE_CMD logs -f [service-name]"
     echo ""
 }
 
@@ -196,9 +204,9 @@ main() {
             echo "✅ Construcción completada"
             ;;
         5)
-            docker-compose ps
+            $DOCKER_COMPOSE_CMD ps
             echo ""
-            docker-compose logs --tail=50
+            $DOCKER_COMPOSE_CMD logs --tail=50
             ;;
         6)
             echo "¿De qué servicio quieres ver los logs?"
@@ -211,12 +219,12 @@ main() {
             read -p "Selecciona (1-6): " log_choice
             
             case $log_choice in
-                1) docker-compose logs -f ;;
-                2) docker-compose logs -f orders-service ;;
-                3) docker-compose logs -f products-service ;;
-                4) docker-compose logs -f notifications-service ;;
-                5) docker-compose logs -f nats-server ;;
-                6) docker-compose logs -f nginx ;;
+                1) $DOCKER_COMPOSE_CMD logs -f ;;
+                2) $DOCKER_COMPOSE_CMD logs -f orders-service ;;
+                3) $DOCKER_COMPOSE_CMD logs -f products-service ;;
+                4) $DOCKER_COMPOSE_CMD logs -f notifications-service ;;
+                5) $DOCKER_COMPOSE_CMD logs -f nats-server ;;
+                6) $DOCKER_COMPOSE_CMD logs -f nginx ;;
                 *) echo "Opción inválida" ;;
             esac
             ;;

@@ -36,13 +36,15 @@ deploy.bat
 mvn clean install -DskipTests
 
 # 2. Construir imágenes Docker
-docker-compose build
+docker compose build
+# o si tienes la versión standalone:
+# docker-compose build
 
 # 3. Desplegar servicios
-docker-compose up -d
+docker compose up -d
 
 # 4. Verificar estado
-docker-compose ps
+docker compose ps
 ```
 
 ### **Opción 3: Makefile (Linux/Mac)**
@@ -102,13 +104,14 @@ make clean
 ### **Estado y Monitoreo**
 ```bash
 # Ver servicios corriendo
-docker-compose ps
+docker compose ps
+# o: docker-compose ps
 
 # Ver logs de todos los servicios
-docker-compose logs -f
+docker compose logs -f
 
 # Ver logs de un servicio específico
-docker-compose logs -f orders-service
+docker compose logs -f orders-service
 
 # Ver uso de recursos
 docker stats
@@ -120,31 +123,31 @@ curl http://localhost/health
 ### **Gestión de Servicios**
 ```bash
 # Reiniciar un servicio
-docker-compose restart orders-service
+docker compose restart orders-service
 
 # Reiniciar todos
-docker-compose restart
+docker compose restart
 
 # Detener todos
-docker-compose down
+docker compose down
 
 # Detener y eliminar volúmenes
-docker-compose down -v
+docker compose down -v
 ```
 
 ### **Desarrollo y Debug**
 ```bash
 # Entrar al contenedor
-docker-compose exec orders-service /bin/sh
+docker compose exec orders-service /bin/sh
 
 # Ver variables de entorno
-docker-compose exec orders-service env
+docker compose exec orders-service env
 
 # Reconstruir un servicio
-docker-compose build orders-service
+docker compose build orders-service
 
 # Reconstruir sin cache
-docker-compose build --no-cache
+docker compose build --no-cache
 ```
 
 ---
@@ -366,4 +369,55 @@ curl http://localhost:8423/subsz
 
 # Monitoreo web
 open http://localhost:8423
+```
+
+---
+
+## 🔧 **Nota sobre Docker Compose**
+
+### **Versiones Compatibles:**
+
+Este proyecto es compatible con **ambas versiones** de Docker Compose:
+
+| **Versión** | **Comando** | **Instalación** | **Estado** |
+|-------------|-------------|----------------|------------|
+| **Integrado** | `docker compose` | Incluido en Docker Desktop/Engine 20.10+ | ✅ **Recomendado** |
+| **Standalone** | `docker-compose` | Instalación separada | ⚠️ Legacy |
+
+### **¿Cómo saber cuál tienes?**
+
+```bash
+# Probar versión integrada (nueva)
+docker compose version
+
+# Probar versión standalone (legacy)
+docker-compose version
+```
+
+### **Scripts Inteligentes:**
+
+Nuestros scripts (`deploy.sh`, `Makefile`) **detectan automáticamente** qué versión tienes:
+
+```bash
+# El script detecta y usa la versión correcta
+./deploy.sh
+
+# O con Makefile
+make up
+```
+
+### **¿Cuál usar manualmente?**
+
+Si ejecutas comandos manualmente, usa:
+
+```bash
+# ✅ Si tienes Docker moderno (recomendado)
+docker compose up -d
+docker compose logs -f
+docker compose down
+
+# ⚠️ Si tienes versión standalone
+docker-compose up -d
+docker-compose logs -f
+docker-compose down
 ```

@@ -8,6 +8,9 @@ COMPOSE_FILE = docker-compose.yml
 DEV_COMPOSE_FILE = docker-compose.dev.yml
 PROJECT_NAME = mini-shop
 
+# Detectar Docker Compose command
+DOCKER_COMPOSE_CMD := $(shell if docker compose version >/dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi)
+
 # Colores para output
 GREEN = \033[0;32m
 BLUE = \033[0;34m
@@ -35,33 +38,33 @@ build: ## Construir servicios Java y crear imágenes Docker
 
 up: build ## Desplegar todos los servicios (producción)
 	@echo "$(BLUE)🚀 Desplegando servicios...$(NC)"
-	docker-compose up -d
+	$(DOCKER_COMPOSE_CMD) up -d
 	@echo "$(GREEN)✅ Servicios desplegados!$(NC)"
 	@make info
 
 down: ## Detener todos los servicios
 	@echo "$(BLUE)🛑 Deteniendo servicios...$(NC)"
-	docker-compose down
+	$(DOCKER_COMPOSE_CMD) down
 	@echo "$(GREEN)✅ Servicios detenidos$(NC)"
 
 logs: ## Ver logs de todos los servicios
-	docker-compose logs -f
+	$(DOCKER_COMPOSE_CMD) logs -f
 
 logs-orders: ## Ver logs del servicio de orders
-	docker-compose logs -f orders-service
+	$(DOCKER_COMPOSE_CMD) logs -f orders-service
 
 logs-products: ## Ver logs del servicio de products
-	docker-compose logs -f products-service
+	$(DOCKER_COMPOSE_CMD) logs -f products-service
 
 logs-notifications: ## Ver logs del servicio de notifications
-	docker-compose logs -f notifications-service
+	$(DOCKER_COMPOSE_CMD) logs -f notifications-service
 
 logs-nats: ## Ver logs de NATS
-	docker-compose logs -f nats-server
+	$(DOCKER_COMPOSE_CMD) logs -f nats-server
 
 dev-up: ## Levantar solo infraestructura para desarrollo
 	@echo "$(BLUE)🔧 Levantando infraestructura de desarrollo...$(NC)"
-	docker-compose -f $(DEV_COMPOSE_FILE) up -d
+	$(DOCKER_COMPOSE_CMD) -f $(DEV_COMPOSE_FILE) up -d
 	@echo "$(GREEN)✅ Infraestructura lista para desarrollo!$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Ahora puedes ejecutar los servicios localmente:$(NC)"
@@ -70,12 +73,12 @@ dev-up: ## Levantar solo infraestructura para desarrollo
 	@echo "  cd notifications-service && ./mvnw spring-boot:run"
 
 dev-down: ## Detener infraestructura de desarrollo
-	docker-compose -f $(DEV_COMPOSE_FILE) down
+	$(DOCKER_COMPOSE_CMD) -f $(DEV_COMPOSE_FILE) down
 
 clean: ## Limpiar contenedores, imágenes y volúmenes
 	@echo "$(BLUE)🧹 Limpiando contenedores...$(NC)"
-	docker-compose down --remove-orphans
-	docker-compose -f $(DEV_COMPOSE_FILE) down --remove-orphans
+	$(DOCKER_COMPOSE_CMD) down --remove-orphans
+	$(DOCKER_COMPOSE_CMD) -f $(DEV_COMPOSE_FILE) down --remove-orphans
 	@echo "$(BLUE)🧹 Limpiando imágenes...$(NC)"
 	docker image prune -f
 	docker system prune -f
@@ -85,7 +88,7 @@ restart: down up ## Reiniciar todos los servicios
 
 status: ## Ver estado de los servicios
 	@echo "$(BLUE)📊 Estado de los servicios:$(NC)"
-	docker-compose ps
+	$(DOCKER_COMPOSE_CMD) ps
 
 health: ## Verificar health checks de los servicios
 	@echo "$(BLUE)❤️  Verificando health checks...$(NC)"
@@ -116,13 +119,13 @@ info: ## Mostrar información de acceso a los servicios
 	@echo "  • Notifications:       http://localhost/health/notifications"
 
 shell-orders: ## Abrir shell en el contenedor de orders
-	docker-compose exec orders-service /bin/sh
+	$(DOCKER_COMPOSE_CMD) exec orders-service /bin/sh
 
 shell-products: ## Abrir shell en el contenedor de products
-	docker-compose exec products-service /bin/sh
+	$(DOCKER_COMPOSE_CMD) exec products-service /bin/sh
 
 shell-notifications: ## Abrir shell en el contenedor de notifications
-	docker-compose exec notifications-service /bin/sh
+	$(DOCKER_COMPOSE_CMD) exec notifications-service /bin/sh
 
 # Comandos de desarrollo rápido
 quick-build: ## Build rápido sin tests
@@ -135,8 +138,8 @@ quick-restart: ## Restart rápido de un servicio específico
 	@echo "3. notifications-service"
 	@read -p "Selecciona (1-3): " choice; \
 	case $$choice in \
-		1) docker-compose restart orders-service ;; \
-		2) docker-compose restart products-service ;; \
-		3) docker-compose restart notifications-service ;; \
+		1) $(DOCKER_COMPOSE_CMD) restart orders-service ;; \
+		2) $(DOCKER_COMPOSE_CMD) restart products-service ;; \
+		3) $(DOCKER_COMPOSE_CMD) restart notifications-service ;; \
 		*) echo "Opción inválida" ;; \
 	esac

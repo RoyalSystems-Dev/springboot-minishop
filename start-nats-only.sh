@@ -13,6 +13,16 @@ if ! docker info > /dev/null 2>&1; then
     exit 1
 fi
 
+# Detectar comando de Docker Compose
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+else
+    echo "❌ Docker Compose no está disponible"
+    exit 1
+fi
+
 # Verificar si ya existe un contenedor de NATS
 if docker ps -a --format "table {{.Names}}" | grep -q "mini-shop-nats"; then
     echo "⚠️  Ya existe un contenedor mini-shop-nats"
