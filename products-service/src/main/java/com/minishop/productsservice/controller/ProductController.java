@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/products")
