@@ -5,3 +5,57 @@ spring:
   application:
     name: notifications-service
 
+# NATS Configuration
+nats:
+  url: nats://localhost:4222
+  connection:
+    timeout: 2000
+    max-reconnect: 60
+    reconnect-wait: 2000
+    ping-interval: 120000
+    cleanup-interval: 30000
+  consumer:
+    max-deliver: 3
+    ack-wait: 30000
+  producer:
+    max-pending: 1000
+    timeout: 2000
+  cluster:
+    enabled: false
+
+# Configuración de subjects para el servicio de notificaciones
+messaging:
+  subjects:
+    notifications:
+      send: "notifications.send"
+      email: "notifications.email"
+      sms: "notifications.sms"
+      push: "notifications.push"
+    orders:
+      created: "orders.created"
+      updated: "orders.updated"
+      cancelled: "orders.cancelled"
+      status-changed: "orders.status.changed"
+    products:
+      low-stock: "products.stock.low"
+    payments:
+      confirmed: "payments.confirmed"
+      failed: "payments.failed"
+
+# Configuración de canales de notificación
+notification:
+  channels:
+    email:
+      enabled: true
+      smtp-host: "localhost"
+      smtp-port: 587
+      username: "noreply@minishop.com"
+      password: "password"
+    sms:
+      enabled: false
+      provider: "twilio"
+      api-key: "your-api-key"
+    push:
+      enabled: false
+      firebase-key: "your-firebase-key"
+

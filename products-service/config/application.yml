@@ -5,4 +5,39 @@ spring:
   application:
     name: products-service
 
+# NATS Configuration
+nats:
+  url: nats://localhost:4222
+  connection:
+    timeout: 2000
+    max-reconnect: 60
+    reconnect-wait: 2000
+    ping-interval: 120000
+    cleanup-interval: 30000
+  consumer:
+    max-deliver: 3
+    ack-wait: 30000
+  producer:
+    max-pending: 1000
+    timeout: 2000
+  cluster:
+    enabled: false
+
+# Configuración de subjects para el servicio de productos
+messaging:
+  subjects:
+    products:
+      created: "products.created"
+      updated: "products.updated"
+      deleted: "products.deleted"
+      inventory-check: "products.inventory.check"
+      inventory-update: "products.inventory.update"
+      low-stock: "products.stock.low"
+    orders:
+      created: "orders.created"
+      updated: "orders.updated"
+      cancelled: "orders.cancelled"
+    notifications:
+      send: "notifications.send"
+
   

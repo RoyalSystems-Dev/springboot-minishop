@@ -1,0 +1,122 @@
+{"properties": [
+  {
+    "name": "nats.url",
+    "type": "java.lang.String",
+    "description": "NATS server URL connection string"
+  },
+  {
+    "name": "nats.connection.timeout",
+    "type": "java.lang.Integer",
+    "description": "Connection timeout in milliseconds"
+  },
+  {
+    "name": "nats.connection.max-reconnect",
+    "type": "java.lang.Integer",
+    "description": "Maximum number of reconnection attempts"
+  },
+  {
+    "name": "nats.connection.reconnect-wait",
+    "type": "java.lang.Integer",
+    "description": "Wait time between reconnection attempts in milliseconds"
+  },
+  {
+    "name": "nats.connection.ping-interval",
+    "type": "java.lang.Integer",
+    "description": "Ping interval to keep connection alive in milliseconds"
+  },
+  {
+    "name": "nats.connection.cleanup-interval",
+    "type": "java.lang.Integer",
+    "description": "Connection cleanup interval in milliseconds"
+  },
+  {
+    "name": "nats.consumer.max-deliver",
+    "type": "java.lang.Integer",
+    "description": "Maximum number of delivery attempts for messages"
+  },
+  {
+    "name": "nats.consumer.ack-wait",
+    "type": "java.lang.Integer",
+    "description": "Time to wait for message acknowledgment in milliseconds"
+  },
+  {
+    "name": "nats.producer.max-pending",
+    "type": "java.lang.Integer",
+    "description": "Maximum number of pending messages for producer"
+  },
+  {
+    "name": "nats.producer.timeout",
+    "type": "java.lang.Integer",
+    "description": "Producer timeout in milliseconds"
+  },
+  {
+    "name": "nats.cluster.enabled",
+    "type": "java.lang.Boolean",
+    "description": "Enable NATS cluster configuration"
+  },
+  {
+    "name": "messaging.subjects.products.created",
+    "type": "java.lang.String",
+    "description": "Subject for product created events"
+  },
+  {
+    "name": "messaging.subjects.products.updated",
+    "type": "java.lang.String",
+    "description": "Subject for product updated events"
+  },
+  {
+    "name": "messaging.subjects.products.deleted",
+    "type": "java.lang.String",
+    "description": "Subject for product deleted events"
+  },
+  {
+    "name": "messaging.subjects.products.stock.low",
+    "type": "java.lang.String",
+    "description": "Subject for low stock alerts"
+  },
+  {
+    "name": "messaging.subjects.products.inventory.check",
+    "type": "java.lang.String",
+    "description": "Subject for inventory check requests"
+  },
+  {
+    "name": "messaging.subjects.products.inventory.update",
+    "type": "java.lang.String",
+    "description": "Subject for inventory update events"
+  },
+  {
+    "name": "messaging.subjects.orders.created",
+    "type": "java.lang.String",
+    "description": "Subject for order created events (consumed by products service)"
+  },
+  {
+    "name": "messaging.subjects.orders.cancelled",
+    "type": "java.lang.String",
+    "description": "Subject for order cancelled events (consumed by products service)"
+  },
+  {
+    "name": "messaging.subjects.notifications.send",
+    "type": "java.lang.String",
+    "description": "Subject for sending notifications"
+  },
+  {
+    "name": "messaging.subjects.products.inventory-check",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.products.inventory-check'"
+  },
+  {
+    "name": "messaging.subjects.products.inventory-update",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.products.inventory-update'"
+  },
+  {
+    "name": "messaging.subjects.products.low-stock",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.products.low-stock'"
+  },
+  {
+    "name": "messaging.subjects.orders.updated",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.orders.updated'"
+  }
+]}

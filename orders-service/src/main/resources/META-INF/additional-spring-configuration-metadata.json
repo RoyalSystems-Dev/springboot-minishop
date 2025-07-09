@@ -1,0 +1,107 @@
+{"properties": [
+  {
+    "name": "nats.connection.timeout",
+    "type": "java.lang.String",
+    "description": "A description for 'nats.connection.timeout'"
+  },
+  {
+    "name": "nats.url",
+    "type": "java.lang.String",
+    "description": "A description for 'nats.url'"
+  },
+  {
+    "name": "messaging.subjects.orders.created",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.orders.created'"
+  },
+  {
+    "name": "nats.cluster.enabled",
+    "type": "java.lang.String",
+    "description": "A description for 'nats.cluster.enabled'"
+  },
+  {
+    "name": "nats.producer.max-pending",
+    "type": "java.lang.String",
+    "description": "A description for 'nats.producer.max-pending'"
+  },
+  {
+    "name": "nats.consumer.max-deliver",
+    "type": "java.lang.String",
+    "description": "A description for 'nats.consumer.max-deliver'"
+  },
+  {
+    "name": "nats.connection.cleanup-interval",
+    "type": "java.lang.String",
+    "description": "A description for 'nats.connection.cleanup-interval'"
+  },
+  {
+    "name": "nats.connection.ping-interval",
+    "type": "java.lang.String",
+    "description": "A description for 'nats.connection.ping-interval'"
+  },
+  {
+    "name": "nats.connection.reconnect-wait",
+    "type": "java.lang.String",
+    "description": "A description for 'nats.connection.reconnect-wait'"
+  },
+  {
+    "name": "nats.connection.max-reconnect",
+    "type": "java.lang.String",
+    "description": "A description for 'nats.connection.max-reconnect'"
+  },
+  {
+    "name": "nats.consumer.ack-wait",
+    "type": "java.lang.String",
+    "description": "A description for 'nats.consumer.ack-wait'"
+  },
+  {
+    "name": "nats.producer.timeout",
+    "type": "java.lang.String",
+    "description": "A description for 'nats.producer.timeout'"
+  },
+  {
+    "name": "messaging.subjects.orders.updated",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.orders.updated'"
+  },
+  {
+    "name": "messaging.subjects.orders.cancelled",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.orders.cancelled'"
+  },
+  {
+    "name": "messaging.subjects.orders.status-changed",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.orders.status-changed'"
+  },
+  {
+    "name": "messaging.subjects.notifications.send",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.notifications.send'"
+  },
+  {
+    "name": "messaging.subjects.products.update-inventory",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.products.update-inventory'"
+  },
+  {
+    "name": "messaging.subjects.products.check-inventory",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.products.check-inventory'"
+  },
+  {
+    "name": "messaging.subjects.payments.process",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.payments.process'"
+  },
+  {
+    "name": "messaging.subjects.payments.confirmed",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.payments.confirmed'"
+  },
+  {
+    "name": "messaging.subjects.payments.failed",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.payments.failed'"
+  }
+]}

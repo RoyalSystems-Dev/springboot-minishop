@@ -5,3 +5,44 @@ spring:
   application:
     name: orders-service
 
+# NATS Configuration
+nats:
+  url: nats://localhost:4222
+  connection:
+    timeout: 2000
+    max-reconnect: 60
+    reconnect-wait: 2000
+    ping-interval: 120000
+    cleanup-interval: 30000
+  consumer:
+    max-deliver: 3
+    ack-wait: 30000
+  producer:
+    max-pending: 1000
+    timeout: 2000
+  cluster:
+    # Para configuración de cluster si es necesario
+    enabled: false
+    # servers:
+    #   - nats://localhost:4222
+    #   - nats://localhost:4223
+    #   - nats://localhost:4224
+  
+# Configuración de subjects para el servicio de órdenes
+messaging:
+  subjects:
+    orders:
+      created: "orders.created"
+      updated: "orders.updated"
+      cancelled: "orders.cancelled"
+      status-changed: "orders.status.changed"
+    notifications:
+      send: "notifications.send"
+    products:
+      check-inventory: "products.inventory.check"
+      update-inventory: "products.inventory.update"
+    payments:
+      process: "payments.process"
+      confirmed: "payments.confirmed"
+      failed: "payments.failed"
+

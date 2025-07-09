@@ -1,0 +1,197 @@
+{"properties": [
+  {
+    "name": "nats.url",
+    "type": "java.lang.String",
+    "description": "NATS server URL connection string"
+  },
+  {
+    "name": "nats.connection.timeout",
+    "type": "java.lang.Integer",
+    "description": "Connection timeout in milliseconds"
+  },
+  {
+    "name": "nats.connection.max-reconnect",
+    "type": "java.lang.Integer",
+    "description": "Maximum number of reconnection attempts"
+  },
+  {
+    "name": "nats.connection.reconnect-wait",
+    "type": "java.lang.Integer",
+    "description": "Wait time between reconnection attempts in milliseconds"
+  },
+  {
+    "name": "nats.connection.ping-interval",
+    "type": "java.lang.Integer",
+    "description": "Ping interval to keep connection alive in milliseconds"
+  },
+  {
+    "name": "nats.connection.cleanup-interval",
+    "type": "java.lang.Integer",
+    "description": "Connection cleanup interval in milliseconds"
+  },
+  {
+    "name": "nats.consumer.max-deliver",
+    "type": "java.lang.Integer",
+    "description": "Maximum number of delivery attempts for messages"
+  },
+  {
+    "name": "nats.consumer.ack-wait",
+    "type": "java.lang.Integer",
+    "description": "Time to wait for message acknowledgment in milliseconds"
+  },
+  {
+    "name": "nats.producer.max-pending",
+    "type": "java.lang.Integer",
+    "description": "Maximum number of pending messages for producer"
+  },
+  {
+    "name": "nats.producer.timeout",
+    "type": "java.lang.Integer",
+    "description": "Producer timeout in milliseconds"
+  },
+  {
+    "name": "nats.cluster.enabled",
+    "type": "java.lang.Boolean",
+    "description": "Enable NATS cluster configuration"
+  },
+  {
+    "name": "messaging.subjects.orders.created",
+    "type": "java.lang.String",
+    "description": "Subject for order created events (listened by notifications)"
+  },
+  {
+    "name": "messaging.subjects.orders.updated",
+    "type": "java.lang.String",
+    "description": "Subject for order updated events (listened by notifications)"
+  },
+  {
+    "name": "messaging.subjects.orders.cancelled",
+    "type": "java.lang.String",
+    "description": "Subject for order cancelled events (listened by notifications)"
+  },
+  {
+    "name": "messaging.subjects.orders.status-changed",
+    "type": "java.lang.String",
+    "description": "Subject for order status change events (listened by notifications)"
+  },
+  {
+    "name": "messaging.subjects.products.created",
+    "type": "java.lang.String",
+    "description": "Subject for product created events (listened by notifications)"
+  },
+  {
+    "name": "messaging.subjects.products.updated",
+    "type": "java.lang.String",
+    "description": "Subject for product updated events (listened by notifications)"
+  },
+  {
+    "name": "messaging.subjects.products.deleted",
+    "type": "java.lang.String",
+    "description": "Subject for product deleted events (listened by notifications)"
+  },
+  {
+    "name": "messaging.subjects.products.stock.low",
+    "type": "java.lang.String",
+    "description": "Subject for low stock alerts (listened by notifications)"
+  },
+  {
+    "name": "messaging.subjects.payments.confirmed",
+    "type": "java.lang.String",
+    "description": "Subject for payment confirmed events (listened by notifications)"
+  },
+  {
+    "name": "messaging.subjects.payments.failed",
+    "type": "java.lang.String",
+    "description": "Subject for payment failed events (listened by notifications)"
+  },
+  {
+    "name": "messaging.subjects.notifications.send",
+    "type": "java.lang.String",
+    "description": "Subject for sending notifications (published by notifications service)"
+  },
+  {
+    "name": "notifications.channels.email.enabled",
+    "type": "java.lang.Boolean",
+    "description": "Enable email notifications channel"
+  },
+  {
+    "name": "notifications.channels.sms.enabled",
+    "type": "java.lang.Boolean",
+    "description": "Enable SMS notifications channel"
+  },
+  {
+    "name": "notifications.channels.push.enabled",
+    "type": "java.lang.Boolean",
+    "description": "Enable push notifications channel"
+  },
+  {
+    "name": "messaging.subjects.notifications.email",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.notifications.email'"
+  },
+  {
+    "name": "messaging.subjects.notifications.sms",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.notifications.sms'"
+  },
+  {
+    "name": "messaging.subjects.notifications.push",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.notifications.push'"
+  },
+  {
+    "name": "messaging.subjects.products.low-stock",
+    "type": "java.lang.String",
+    "description": "A description for 'messaging.subjects.products.low-stock'"
+  },
+  {
+    "name": "notification.channels.email.enabled",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.channels.email.enabled'"
+  },
+  {
+    "name": "notification.channels.email.smtp-host",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.channels.email.smtp-host'"
+  },
+  {
+    "name": "notification.channels.email.smtp-port",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.channels.email.smtp-port'"
+  },
+  {
+    "name": "notification.channels.email.username",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.channels.email.username'"
+  },
+  {
+    "name": "notification.channels.email.password",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.channels.email.password'"
+  },
+  {
+    "name": "notification.channels.sms.enabled",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.channels.sms.enabled'"
+  },
+  {
+    "name": "notification.channels.sms.provider",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.channels.sms.provider'"
+  },
+  {
+    "name": "notification.channels.sms.api-key",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.channels.sms.api-key'"
+  },
+  {
+    "name": "notification.channels.push.enabled",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.channels.push.enabled'"
+  },
+  {
+    "name": "notification.channels.push.firebase-key",
+    "type": "java.lang.String",
+    "description": "A description for 'notification.channels.push.firebase-key'"
+  }
+]}
