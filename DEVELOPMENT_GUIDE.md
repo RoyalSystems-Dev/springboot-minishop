@@ -15,13 +15,22 @@ mini-shop/
 │   │       └── App.js
 │   └── src/main/resources/static/ # 📦 Producción (compilado)
 │
-└── products-service/
-    ├── public/                     # 🔥 Desarrollo en caliente  
+├── products-service/
+│   ├── public/                     # 🔥 Desarrollo en caliente  
+│   │   ├── index.html
+│   │   ├── css/app.css
+│   │   └── js/
+│   │       ├── main.js
+│   │       └── App.js
+│   └── src/main/resources/static/ # 📦 Producción (compilado)
+│
+└── notifications-service/
+    ├── public/                     # 🔥 Desarrollo en caliente
     │   ├── index.html
-    │   ├── css/app.css
+    │   ├── css/notifications.css
     │   └── js/
     │       ├── main.js
-    │       └── App.js
+    │       └── App.js             # 📢 Real-time notifications
     └── src/main/resources/static/ # 📦 Producción (compilado)
 ```
 
@@ -52,6 +61,20 @@ spring:
       - classpath:/public/              # 📦 Fallback adicional
 ```
 
+**Notifications Service (Puerto 8083):**
+```yaml
+spring:
+  web:
+    resources:
+      static-locations:
+      - file:${user.dir}/public/        # 🔥 Desarrollo sin compilar
+      - classpath:/static/              # 📦 Fallback producción
+      - classpath:/public/              # 📦 Fallback adicional
+```
+      - classpath:/static/              # 📦 Fallback producción
+      - classpath:/public/              # 📦 Fallback adicional
+```
+
 ## 🔄 Flujo de Desarrollo
 
 ### 1. Iniciar Servicios
@@ -62,6 +85,10 @@ cd orders-service
 
 # Terminal 2 - Products Service  
 cd products-service
+./mvnw spring-boot:run
+
+# Terminal 3 - Notifications Service
+cd notifications-service
 ./mvnw spring-boot:run
 ```
 
@@ -77,6 +104,7 @@ cd products-service
 ### 3. Ver Cambios Instantáneos
 - **Orders**: http://localhost:8081 🔄 F5 para ver cambios
 - **Products**: http://localhost:8082 🔄 F5 para ver cambios
+- **Notifications**: http://localhost:8093 🔄 F5 para ver cambios
 
 ## 🎯 Ventajas de esta Configuración
 
@@ -122,6 +150,54 @@ cd products-service
 }
 ```
 
+### Notifications Service (Púrpura/Rosa)
+```css
+/* public/css/notifications.css */
+.header {
+  background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+}
+```
+
+## 📢 Notifications Service - Tiempo Real
+
+### 🚀 Características Especiales
+El **Notifications Service** tiene capacidades únicas de tiempo real:
+
+- **🔄 Auto-refresh cada 3 segundos** - Ve notificaciones según aparecen
+- **🔊 Sonido de notificación** - Alertas audibles opcionales
+- **📊 Estadísticas en vivo** - Contadores y métricas en tiempo real
+- **🎯 Filtrado avanzado** - Por tipo, severidad, estado de lectura
+- **🧪 Generación de pruebas** - Crear notificaciones de test
+
+### 🎨 Temas de Color
+- **💜 Púrpura/Rosa** - Tema principal del servicio
+- **🟢 Verde** - Notificaciones SUCCESS
+- **🔵 Azul** - Notificaciones INFO  
+- **🟡 Naranja** - Notificaciones WARNING
+- **🔴 Rojo** - Notificaciones ERROR
+
+### 📡 Integración NATS
+El servicio escucha automáticamente eventos de:
+- **Orders**: Creación, cancelación de órdenes
+- **Products**: Alertas de stock bajo
+- **Payments**: Confirmaciones de pago
+- **Direct**: Notificaciones directas
+
+### 🛠️ Desarrollo
+```bash
+# Terminal 3 - Notifications Service
+cd notifications-service
+./mvnw spring-boot:run
+
+# Abrir en navegador
+http://localhost:8083
+```
+
+**Archivos clave para editar:**
+- `public/js/App.js` - Lógica de tiempo real
+- `public/css/notifications.css` - Estilos púrpura
+- `public/index.html` - Estructura base
+
 ## 🔧 Comandos Útiles
 
 ### Desarrollo
@@ -131,6 +207,9 @@ cd orders-service && ./mvnw spring-boot:run
 
 # Iniciar products service  
 cd products-service && ./mvnw spring-boot:run
+
+# Iniciar notifications service
+cd notifications-service && ./mvnw spring-boot:run
 
 # Ver logs en tiempo real
 tail -f logs/application.log
@@ -178,6 +257,7 @@ curl http://localhost:8082/
 |----------|--------|---------------|---------|
 | Orders | 8081 | http://localhost:8081 | http://localhost:8081/orders |
 | Products | 8082 | http://localhost:8082 | http://localhost:8082/products |
+| Notifications | 8083 | http://localhost:8083 | http://localhost:8083/api/notifications |
 
 ## 🎉 ¡Desarrollo Eficiente!
 

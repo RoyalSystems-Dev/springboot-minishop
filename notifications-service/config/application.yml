@@ -7,7 +7,9 @@ spring:
   web:
     resources:
       static-locations:
-      - classpath:${user.dir}/public/
+      - file:${user.dir}/public/
+      - classpath:/static/
+      - classpath:/public/
 
 # NATS Configuration
 nats:

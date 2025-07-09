@@ -2,6 +2,8 @@ package com.minishop.notificationsservice.service;
 
 import com.minishop.notificationsservice.config.MessagingProperties;
 import com.minishop.notificationsservice.config.NotificationProperties;
+import com.minishop.notificationsservice.model.Notification;
+import com.minishop.notificationsservice.repository.NotificationRepository;
 import io.nats.client.Connection;
 import io.nats.client.Message;
 import io.nats.client.Subscription;
@@ -26,6 +28,9 @@ public class NotificationService {
     
     @Autowired
     private NotificationProperties notificationProperties;
+    
+    @Autowired
+    private NotificationRepository notificationRepository;
     
     @PostConstruct
     public void initializeSubscriptions() {
@@ -270,6 +275,10 @@ public class NotificationService {
         System.out.println("  Type: " + type);
         System.out.println("  Message: " + message);
         
+        // Crear y guardar la notificación en el repositorio
+        Notification notification = createNotificationByType(type, message);
+        notificationRepository.save(notification);
+        
         // Verificar qué canales están habilitados
         if (notificationProperties.getChannels().getEmail().isEnabled()) {
             sendEmailNotification(message, type);
@@ -282,6 +291,43 @@ public class NotificationService {
         if (notificationProperties.getChannels().getPush().isEnabled()) {
             sendPushNotification(message, type);
         }
+    }
+    
+    /**
+     * Crea una notificación basada en el tipo
+     */
+    private Notification createNotificationByType(String type, String message) {
+        String title;
+        String severity;
+        
+        switch (type) {
+            case "ORDER_CREATED":
+                title = "Nueva Orden";
+                severity = "SUCCESS";
+                break;
+            case "ORDER_CANCELLED":
+                title = "Orden Cancelada";
+                severity = "WARNING";
+                break;
+            case "LOW_STOCK":
+                title = "Stock Bajo";
+                severity = "ERROR";
+                break;
+            case "PAYMENT_CONFIRMED":
+                title = "Pago Confirmado";
+                severity = "SUCCESS";
+                break;
+            case "DIRECT":
+                title = "Notificación Directa";
+                severity = "INFO";
+                break;
+            default:
+                title = "Notificación";
+                severity = "INFO";
+                break;
+        }
+        
+        return new Notification(type, title, message, severity);
     }
     
     /**

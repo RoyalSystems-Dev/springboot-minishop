@@ -4,21 +4,34 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Mini Shop - Notificaciones</title>
+	<title>Notifications Center - Mini Shop</title>
 
-	<link rel="stylesheet" href="./css/app.css">
+	<link rel="stylesheet" href="./css/notifications.css">
+	<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📢</text></svg>">
 
 	<style>
+		/* Loading animation for initial load */
+		.loading-app {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+			font-size: 1.2rem;
+			color: #8B5CF6;
+		}
 	</style>
 </head>
 
 <body>
-	<div id="app"></div>
+	<div id="app">
+		<div class="loading-app">
+			📢 Loading Notifications Center...
+		</div>
+	</div>
 
 	<script type="importmap">
         { "imports": {
-          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
-          "axios": "https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/esm/axios.min.js"
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
         } }
     </script>
 
