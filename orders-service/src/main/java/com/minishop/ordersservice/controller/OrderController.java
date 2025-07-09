@@ -1,9 +1,9 @@
-package com.minishop.orderservice.controller;
+package com.minishop.ordersservice.controller;
 
-import com.minishop.orderservice.dto.OrderDto;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.web.bind.annotation.*;
+
+import com.minishop.ordersservice.dto.OrderDto;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import java.util.List;
@@ -13,9 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
-
-    @Autowired(required = false)
-    private StreamBridge streamBridge;
 
     // Simulación de base de datos en memoria
     private static final ConcurrentHashMap<Long, OrderDto> orders = new ConcurrentHashMap<>();
@@ -58,15 +55,6 @@ public class OrderController {
         orderDto.setId(nextId++);
 
         orders.put(orderDto.getId(), orderDto);
-
-        // Enviar evento a NATS solo si está disponible
-        if (streamBridge != null) {
-            try {
-                streamBridge.send("orderCreated-out-0", orderDto);
-            } catch (Exception e) {
-                System.err.println("Error enviando evento: " + e.getMessage());
-            }
-        }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(orderDto);
     }

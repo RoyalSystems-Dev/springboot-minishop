@@ -1,4 +1,4 @@
-package com.minishop.orderservice.dto;
+package com.minishop.ordersservice.dto;
 
 import lombok.Data;
 import java.time.LocalDateTime;

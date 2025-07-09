@@ -1,4 +1,4 @@
-package com.minishop.orderservice;
+package com.minishop.ordersservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
