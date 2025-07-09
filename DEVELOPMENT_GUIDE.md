@@ -71,9 +71,6 @@ spring:
       - classpath:/static/              # 📦 Fallback producción
       - classpath:/public/              # 📦 Fallback adicional
 ```
-      - classpath:/static/              # 📦 Fallback producción
-      - classpath:/public/              # 📦 Fallback adicional
-```
 
 ## 🔄 Flujo de Desarrollo
 
