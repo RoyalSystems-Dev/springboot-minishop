@@ -1,0 +1,77 @@
+# Configuración VPN para notifications-service
+server:
+  port: 8083
+  address: 0.0.0.0  # Escuchar en todas las interfaces de red
+
+spring:
+  application:
+    name: notifications-service
+  profiles:
+    active: docker-vpn
+  web:
+    resources:
+      static-locations:
+      - file:/app/public/
+      - classpath:/static/
+      - classpath:/public/
+  
+  # H2 Database Configuration (para Docker VPN)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true   # Permitir acceso desde VPN
+  
+  # JPA Configuration
+  jpa:
+    show-sql: false             # Desactivar en servidor
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        '[format_sql]': false   # Desactivar en servidor
+        
+  # DataSource
+  datasource:
+    url: jdbc:h2:mem:notificationsdb
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+
+# NATS Configuration para Docker VPN
+nats:
+  url: nats://nats-server:4222  # Puerto interno del contenedor
+  connection:
+    timeout: 5000
+    max-reconnect: 60
+    reconnect-wait: 3000
+    ping-interval: 120000
+    cleanup-interval: 30000
+  consumer:
+    max-deliver: 3
+    ack-wait: 30000
+  producer:
+    max-pending: 1000
+    timeout: 5000
+
+# Configuración de logs para Docker
+logging:
+  level:
+    '[com.minishop]': INFO
+    '[org.springframework]': WARN
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator para health checks (accesible desde VPN)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  server:
+    address: 0.0.0.0  # Actuator también en todas las interfaces
