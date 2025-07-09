@@ -10,6 +10,30 @@ spring:
       - file:${user.dir}/public/
       - classpath:/static/
       - classpath:/public/
+  
+  # H2 Database Configuration (para exploración)
+  h2:
+    console:
+      enabled: true              # Habilitar consola web H2
+      path: /h2-console          # URL: http://localhost:8083/h2-console
+      settings:
+        web-allow-others: false  # Solo acceso local
+  
+  # JPA Configuration (opcional - Spring Boot lo autoconfigura)
+  jpa:
+    show-sql: true              # Mostrar SQL en logs
+    hibernate:
+      ddl-auto: create-drop     # Crear tablas al iniciar, eliminar al cerrar
+    properties:
+      hibernate:
+        '[format_sql]': true    # Formatear SQL en logs
+        
+  # DataSource (opcional - Spring Boot lo autoconfigura)
+  datasource:
+    url: jdbc:h2:mem:notificationsdb  # BD en memoria llamada 'notificationsdb'
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
 
 # NATS Configuration
 nats:
