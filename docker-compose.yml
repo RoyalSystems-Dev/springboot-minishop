@@ -2,7 +2,7 @@
 # Versión: 1.0
 # Servicios: orders, products, notifications + NATS + nginx
 
-version: '3.8'
+# version: '3.8'
 
 services:
   # ========================================
