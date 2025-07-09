@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: orders-service
+  web:
+    resources:
+      static-locations:
+      - classpath:${user.dir}/public/
 
 # NATS Configuration
 nats:
