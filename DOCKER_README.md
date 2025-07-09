@@ -6,10 +6,10 @@
 🌐 Nginx (Puerto 80)
     ↓
 📦 Orders Service (Puerto 8081)
-📦 Products Service (Porto 8082)  
+📦 Products Service (Puerto 8082)  
 📦 Notifications Service (Puerto 8083)
     ↓
-📡 NATS Server (Puerto 4222)
+📡 NATS Server Dedicado (Puerto 8422)
 ```
 
 ---
@@ -92,7 +92,8 @@ make clean
 | **Products** | 8082 | http://localhost/products | API de productos |
 | **Notifications** | 8083 | http://localhost/notifications-app | Interfaz de notificaciones |
 | **H2 Console** | - | http://localhost/h2-console | Base de datos H2 |
-| **NATS Monitor** | 8222 | http://localhost:8222 | Monitoreo NATS |
+| **NATS Monitor** | 8423 | http://localhost:8423 | Monitoreo NATS (dedicado) |
+| **NATS Client** | 8422 | nats://localhost:8422 | Cliente NATS (dedicado) |
 
 ---
 
@@ -210,11 +211,11 @@ docker-compose logs -f -t orders-service
 
 #### **Debug de NATS:**
 ```bash
-# Monitoring web de NATS
-curl http://localhost:8222/connz
+# Monitoring web de NATS (instancia dedicada)
+curl http://localhost:8423/connz
 
 # Ver subjects activos
-curl http://localhost:8222/subsz
+curl http://localhost:8423/subsz
 ```
 
 ---
@@ -304,19 +305,65 @@ services:
 
 ---
 
-## 📚 **Recursos Adicionales**
+## 📡 **Configuración NATS Dedicado**
 
-- 📖 [Docker Compose Documentation](https://docs.docker.com/compose/)
-- 🌐 [NATS Documentation](https://docs.nats.io/)
-- 🍃 [Spring Boot Docker Guide](https://spring.io/guides/gs/spring-boot-docker/)
-- 🔧 [Nginx Configuration](https://nginx.org/en/docs/)
+### **¿Por qué usar NATS dedicado?**
 
----
+Tu Mini-Shop ahora usa una **instancia separada de NATS** en puertos diferentes:
 
-## 🎯 **Próximos Pasos**
+- ✅ **Sin conflictos** con tu NATS existente (puerto 4222)
+- ✅ **Aislamiento completo** para pruebas
+- ✅ **Fácil debugging** y monitoreo dedicado
+- ✅ **Flexibilidad** para desarrollo
 
-1. **✅ Configurar CI/CD** con GitHub Actions
-2. **✅ Agregar monitoreo** con Prometheus + Grafana
-3. **✅ Implementar logs centralizados** con ELK Stack
-4. **✅ Configurar backup** de volúmenes
-5. **✅ Agregar certificados SSL** para HTTPS
+### **Puertos del NATS Dedicado:**
+
+| **Servicio** | **Puerto Externo** | **Puerto Interno** | **Uso** |
+|--------------|-------------------|-------------------|---------|
+| **NATS Client** | 8422 | 4222 | Conexiones de aplicaciones |
+| **NATS Monitor** | 8423 | 8222 | Web UI de monitoreo |
+| **NATS Cluster** | 8424 | 6222 | Comunicación cluster |
+
+### **Opciones de Desarrollo:**
+
+#### **Opción 1: Todo en Docker (Recomendado para testing)**
+```bash
+# Deploy completo
+./deploy.sh
+# o
+make up
+```
+
+#### **Opción 2: Solo NATS en Docker + Servicios locales**
+```bash
+# Solo NATS
+./start-nats-only.sh
+
+# Servicios localmente (en terminales separadas)
+export SPRING_PROFILES_ACTIVE=local-with-docker-nats
+cd orders-service && ./mvnw spring-boot:run
+cd products-service && ./mvnw spring-boot:run  
+cd notifications-service && ./mvnw spring-boot:run
+```
+
+#### **Opción 3: Solo infraestructura (NATS + DB)**
+```bash
+# NATS + PostgreSQL + Redis + Adminer
+make dev-up
+```
+
+### **Verificar NATS Dedicado:**
+
+```bash
+# Health check
+curl http://localhost:8423/healthz
+
+# Ver conexiones
+curl http://localhost:8423/connz
+
+# Ver subjects activos
+curl http://localhost:8423/subsz
+
+# Monitoreo web
+open http://localhost:8423
+```

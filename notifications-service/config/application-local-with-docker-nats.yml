@@ -1,0 +1,64 @@
+# Configuración para usar NATS externo (si quieres conectar desde fuera de Docker)
+# Para usar en development local cuando los servicios Spring Boot NO están en Docker
+
+server:
+  port: 8083
+
+spring:
+  application:
+    name: notifications-service
+  profiles:
+    active: local-with-docker-nats
+  web:
+    resources:
+      static-locations:
+      - file:${user.dir}/public/
+      - classpath:/static/
+      - classpath:/public/
+  
+  # H2 Database Configuration
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+  
+  # JPA Configuration
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        '[format_sql]': true
+        
+  # DataSource
+  datasource:
+    url: jdbc:h2:mem:notificationsdb
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+
+# NATS Configuration para conectar desde fuera de Docker
+nats:
+  url: nats://localhost:8422  # Puerto externo del NATS en Docker
+  connection:
+    timeout: 5000
+    max-reconnect: 60
+    reconnect-wait: 3000
+    ping-interval: 120000
+    cleanup-interval: 30000
+  consumer:
+    max-deliver: 3
+    ack-wait: 30000
+  producer:
+    max-pending: 1000
+    timeout: 5000
+
+# Configuración de logs
+logging:
+  level:
+    '[com.minishop]': INFO
+    '[org.springframework]': WARN
+    root: INFO

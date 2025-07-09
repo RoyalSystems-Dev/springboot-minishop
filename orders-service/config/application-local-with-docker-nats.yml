@@ -1,0 +1,36 @@
+# Configuración para usar NATS externo (si quieres conectar desde fuera de Docker)
+# Para usar en development local cuando los servicios Spring Boot NO están en Docker
+
+server:
+  port: 8081
+
+spring:
+  application:
+    name: orders-service
+  profiles:
+    active: local-with-docker-nats
+
+# NATS Configuration para conectar desde fuera de Docker
+nats:
+  url: nats://localhost:8422  # Puerto externo del NATS en Docker
+  connection:
+    timeout: 5000
+    max-reconnect: 60
+    reconnect-wait: 3000
+    ping-interval: 120000
+    cleanup-interval: 30000
+  consumer:
+    max-deliver: 3
+    ack-wait: 30000
+  producer:
+    max-pending: 1000
+    timeout: 5000
+  cluster:
+    enabled: false
+
+# Configuración de logs
+logging:
+  level:
+    '[com.minishop]': INFO
+    '[org.springframework]': WARN
+    root: INFO

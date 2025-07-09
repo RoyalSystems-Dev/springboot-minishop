@@ -8,9 +8,9 @@ spring:
   profiles:
     active: docker
 
-# NATS Configuration para Docker
+# NATS Configuration para Docker (instancia dedicada)
 nats:
-  url: nats://nats-server:4222  # Usar nombre del servicio Docker
+  url: nats://nats-server:4222  # Puerto interno del contenedor (sigue siendo 4222)
   connection:
     timeout: 5000               # Aumentar timeout para Docker
     max-reconnect: 60

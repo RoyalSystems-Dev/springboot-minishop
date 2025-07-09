@@ -6,20 +6,22 @@ version: '3.8'
 
 services:
   # ========================================
-  # NATS Server (Message Broker)
+  # NATS Server (Message Broker) - Instancia dedicada para Mini-Shop
   # ========================================
   nats-server:
     image: nats:2.10-alpine
     container_name: mini-shop-nats
     ports:
-      - "4222:4222"      # NATS Client Port
-      - "8222:8222"      # HTTP Monitoring Port
-      - "6222:6222"      # Cluster Port
+      - "8422:4222"      # NATS Client Port (puerto externo 8422)
+      - "8423:8222"      # HTTP Monitoring Port (puerto externo 8423)
+      - "8424:6222"      # Cluster Port (puerto externo 8424)
     command: 
       - "--http_port"
       - "8222"
       - "--name"
-      - "mini-shop-nats"
+      - "mini-shop-nats-dedicated"
+      - "--server_name"
+      - "mini-shop-instance"
     volumes:
       - nats_data:/data
     networks:

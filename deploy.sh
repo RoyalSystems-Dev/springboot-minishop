@@ -109,7 +109,7 @@ verify_deployment() {
     sleep 30
     
     # Verificar cada servicio
-    services=("nats-server:8222/healthz" "orders-service:8081/actuator/health" "products-service:8082/actuator/health" "notifications-service:8083/actuator/health")
+    services=("nats-server:8423/healthz" "orders-service:8081/actuator/health" "products-service:8082/actuator/health" "notifications-service:8083/actuator/health")
     
     for service_endpoint in "${services[@]}"; do
         service_name=$(echo $service_endpoint | cut -d':' -f1)
@@ -143,7 +143,7 @@ show_info() {
     echo "  • Products Service:      http://localhost/products"
     echo "  • Notifications Service: http://localhost/notifications-app"
     echo "  • H2 Console:           http://localhost/h2-console"
-    echo "  • NATS Monitoring:      http://localhost:8222"
+    echo "  • NATS Monitoring:      http://localhost:8423"
     echo ""
     echo "🔍 Health Checks:"
     echo "  • General:              http://localhost/health"
