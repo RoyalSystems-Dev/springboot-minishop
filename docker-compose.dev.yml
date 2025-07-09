@@ -1,0 +1,110 @@
+# Docker Compose para Desarrollo - Mini-Shop
+# Solo servicios de infraestructura (NATS, etc.)
+# Los servicios Spring Boot se ejecutan localmente para hot-reload
+
+version: '3.8'
+
+services:
+  # ========================================
+  # NATS Server (Message Broker)
+  # ========================================
+  nats-server:
+    image: nats:2.10-alpine
+    container_name: mini-shop-nats-dev
+    ports:
+      - "4222:4222"      # NATS Client Port
+      - "8222:8222"      # HTTP Monitoring Port
+      - "6222:6222"      # Cluster Port
+    command: 
+      - "--http_port"
+      - "8222"
+      - "--name"
+      - "mini-shop-nats-dev"
+      - "--debug"
+    volumes:
+      - nats_dev_data:/data
+    networks:
+      - mini-shop-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # ========================================
+  # PostgreSQL (para cuando quieras migrar de H2)
+  # ========================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: mini-shop-postgres-dev
+    environment:
+      POSTGRES_DB: minishop
+      POSTGRES_USER: minishop
+      POSTGRES_PASSWORD: minishop123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - mini-shop-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U minishop -d minishop"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ========================================
+  # Redis (para caching y sesiones)
+  # ========================================
+  redis:
+    image: redis:7-alpine
+    container_name: mini-shop-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - mini-shop-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ========================================
+  # Adminer (GUI para PostgreSQL)
+  # ========================================
+  adminer:
+    image: adminer:4-standalone
+    container_name: mini-shop-adminer-dev
+    ports:
+      - "8080:8080"
+    networks:
+      - mini-shop-dev-network
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+# ========================================
+# Networks
+# ========================================
+networks:
+  mini-shop-dev-network:
+    driver: bridge
+    name: mini-shop-dev-net
+
+# ========================================
+# Volumes
+# ========================================
+volumes:
+  nats_dev_data:
+    name: mini-shop-nats-dev-data
+  postgres_dev_data:
+    name: mini-shop-postgres-dev-data
+  redis_dev_data:
+    name: mini-shop-redis-dev-data

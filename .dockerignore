@@ -1,0 +1,53 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+
+# Build artifacts
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.bak
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+docs/
+
+# Development files
+docker-compose.dev.yml
+Makefile
+deploy.sh
+deploy.bat
+
+# Test files
+src/test/
+
+# Configuration files that shouldn't be in container
+application-local.yml
+application-dev.yml
