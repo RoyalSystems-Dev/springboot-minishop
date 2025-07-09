@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: notifications-service
+  web:
+    resources:
+      static-locations:
+      - classpath:${user.dir}/public/
 
 # NATS Configuration
 nats:

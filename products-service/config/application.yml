@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: products-service
+  web:
+    resources:
+      static-locations:
+      - file:${user.dir}/public/
 
 # NATS Configuration
 nats:
