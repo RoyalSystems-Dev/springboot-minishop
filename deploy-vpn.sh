@@ -88,7 +88,7 @@ detect_server_ip() {
 # Limpiar containers anteriores
 cleanup() {
     print_step "Limpiando containers anteriores..."
-    $DOCKER_COMPOSE_CMD -f docker-compose.vpn.yml down --remove-orphans || true
+    $    $DOCKER_COMPOSE_CMD -f docker-compose.vpn.yml down --remove-orphans || true
     docker system prune -f || true
 }
 
@@ -170,22 +170,22 @@ check_firewall() {
     # Verificar si ufw está activo
     if command -v ufw &> /dev/null && ufw status | grep -q "Status: active"; then
         echo "🔥 UFW está activo"
-        echo "Verificando reglas para puertos 80, 8081, 8082, 8083, 8422, 8423..."
+        echo "Verificando reglas para puertos 8088, 8081, 8082, 8083, 8422, 8423..."
         
         # Sugerir reglas de firewall
         echo ""
         echo -e "${YELLOW}📋 Reglas de firewall sugeridas:${NC}"
-        echo "sudo ufw allow 80"
-        echo "sudo ufw allow 8081"
-        echo "sudo ufw allow 8082"
-        echo "sudo ufw allow 8083"
-        echo "sudo ufw allow 8422"
-        echo "sudo ufw allow 8423"
+        echo "sudo ufw allow 8088   # Nginx (Mini-Shop)"
+        echo "sudo ufw allow 8081   # Orders Service"
+        echo "sudo ufw allow 8082   # Products Service"
+        echo "sudo ufw allow 8083   # Notifications Service"
+        echo "sudo ufw allow 8422   # NATS Client"
+        echo "sudo ufw allow 8423   # NATS Monitoring"
         echo ""
         
         read -p "¿Quieres aplicar estas reglas automáticamente? (y/n): " apply_rules
         if [[ "$apply_rules" =~ ^[Yy]$ ]]; then
-            sudo ufw allow 80
+            sudo ufw allow 8088
             sudo ufw allow 8081
             sudo ufw allow 8082
             sudo ufw allow 8083
@@ -203,15 +203,15 @@ show_info() {
     print_step "Información de los servicios VPN:"
     echo ""
     echo -e "${GREEN}🌐 Acceso EXTERNO desde tu máquina local:${NC}"
-    echo "  • Mini-Shop Portal:      http://$SERVER_IP"
-    echo "  • Orders Service:        http://$SERVER_IP/orders-app"
-    echo "  • Products Service:      http://$SERVER_IP/products"
-    echo "  • Notifications Service: http://$SERVER_IP/notifications-app"
-    echo "  • H2 Console:           http://$SERVER_IP/h2-console"
+    echo "  • Mini-Shop Portal:      http://$SERVER_IP:8088"
+    echo "  • Orders Service:        http://$SERVER_IP:8088/orders-app"
+    echo "  • Products Service:      http://$SERVER_IP:8088/products"
+    echo "  • Notifications Service: http://$SERVER_IP:8088/notifications-app"
+    echo "  • H2 Console:           http://$SERVER_IP:8088/h2-console"
     echo "  • NATS Monitoring:      http://$SERVER_IP:8423"
     echo ""
     echo -e "${BLUE}🔍 Health Checks EXTERNOS:${NC}"
-    echo "  • General:              http://$SERVER_IP/health"
+    echo "  • General:              http://$SERVER_IP:8088/health"
     echo "  • Orders:               http://$SERVER_IP:8081/actuator/health"
     echo "  • Products:             http://$SERVER_IP:8082/actuator/health"  
     echo "  • Notifications:        http://$SERVER_IP:8083/actuator/health"
@@ -237,7 +237,7 @@ main() {
     
     echo ""
     echo -e "${GREEN}🎉 ¡Mini-Shop desplegado exitosamente en VPN!${NC}"
-    echo -e "${BLUE}🔗 Accede desde tu máquina local: http://$SERVER_IP${NC}"
+    echo -e "${BLUE}🔗 Accede desde tu máquina local: http://$SERVER_IP:8088${NC}"
 }
 
 # Ejecutar función principal
