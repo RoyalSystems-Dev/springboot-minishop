@@ -66,7 +66,7 @@ check_dependencies() {
 # Limpiar containers anteriores
 cleanup() {
     print_step "Limpiando containers anteriores..."
-    $DOCKER_COMPOSE_CMD down --remove-orphans || true
+    $    $DOCKER_COMPOSE_CMD down --remove-orphans || true
     docker system prune -f || true
 }
 
@@ -116,12 +116,17 @@ verify_deployment() {
     echo "Esperando que los servicios estén listos..."
     sleep 30
     
-    # Verificar cada servicio
-    services=("nats-server:8423/healthz" "orders-service:8081/actuator/health" "products-service:8082/actuator/health" "notifications-service:8083/actuator/health")
+    # Verificar cada servicio - usando puerto 8088 para nginx
+    services=("localhost:8088/health" "nats-server:8423/healthz" "orders-service:8081/actuator/health" "products-service:8082/actuator/health" "notifications-service:8083/actuator/health")
     
     for service_endpoint in "${services[@]}"; do
-        service_name=$(echo $service_endpoint | cut -d':' -f1)
-        endpoint="http://localhost:$(echo $service_endpoint | cut -d':' -f2-)"
+        if [[ "$service_endpoint" == localhost* ]]; then
+            service_name="nginx"
+            endpoint="http://$service_endpoint"
+        else
+            service_name=$(echo $service_endpoint | cut -d':' -f1)
+            endpoint="http://localhost:$(echo $service_endpoint | cut -d':' -f2-)"
+        fi
         
         echo "🔍 Verificando $service_name..."
         
@@ -145,23 +150,27 @@ verify_deployment() {
 show_info() {
     print_step "Información de los servicios:"
     echo ""
-    echo "🌐 Acceso a los servicios:"
-    echo "  • Mini-Shop Portal:      http://localhost"
-    echo "  • Orders Service:        http://localhost/orders-app"
-    echo "  • Products Service:      http://localhost/products"
-    echo "  • Notifications Service: http://localhost/notifications-app"
-    echo "  • H2 Console:           http://localhost/h2-console"
+    echo "🌐 Acceso a los servicios (Puerto 8088):"
+    echo "  • Mini-Shop Portal:      http://localhost:8088"
+    echo "  • Orders Service:        http://localhost:8088/orders-app"
+    echo "  • Products Service:      http://localhost:8088/products"
+    echo "  • Notifications Service: http://localhost:8088/notifications-app"
+    echo "  • H2 Console:           http://localhost:8088/h2-console"
     echo "  • NATS Monitoring:      http://localhost:8423"
     echo ""
     echo "🔍 Health Checks:"
-    echo "  • General:              http://localhost/health"
-    echo "  • Orders:               http://localhost/health/orders"
-    echo "  • Products:             http://localhost/health/products"  
-    echo "  • Notifications:        http://localhost/health/notifications"
+    echo "  • General:              http://localhost:8088/health"
+    echo "  • Orders:               http://localhost:8088/health/orders"
+    echo "  • Products:             http://localhost:8088/health/products"  
+    echo "  • Notifications:        http://localhost:8088/health/notifications"
     echo ""
     echo "📊 Logs:"
     echo "  • Ver todos los logs:   $DOCKER_COMPOSE_CMD logs -f"
     echo "  • Ver logs específicos: $DOCKER_COMPOSE_CMD logs -f [service-name]"
+    echo ""
+    echo "💡 Configuración Puerto 8088:"
+    echo "  • Evita conflictos con Nginx existente en puerto 80"
+    echo "  • Para puerto 80 original, usa docker-compose.original.yml"
     echo ""
 }
 

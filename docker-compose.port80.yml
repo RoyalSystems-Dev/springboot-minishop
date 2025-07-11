@@ -1,4 +1,4 @@
-# Docker Compose para Mini-Shop - Puerto 8088 (Sin conflictos)
+# Docker Compose para Mini-Shop - Configuración Puerto 80 Original
 # Versión: 1.0
 # Servicios: orders, products, notifications + NATS + nginx
 
@@ -119,14 +119,14 @@ services:
       start_period: 60s
 
   # ========================================
-  # Nginx (Reverse Proxy y Load Balancer)
+  # Nginx (Reverse Proxy y Load Balancer) - Puerto 80 Original
   # ========================================
   nginx:
     image: nginx:1.25-alpine
     container_name: mini-shop-nginx
     ports:
-      - "8088:8088"      # Puerto 8088 para evitar conflictos
-      - "8443:443"       # HTTPS en puerto alternativo
+      - "80:80"          # Puerto 80 original
+      - "443:443"        # HTTPS estándar
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
