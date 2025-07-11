@@ -97,9 +97,9 @@ echo ✅ Construcción completada
 goto end
 
 :show_status
-docker-compose ps
+%DOCKER_COMPOSE_CMD% ps
 echo.
-docker-compose logs --tail=50
+%DOCKER_COMPOSE_CMD% logs --tail=50
 goto end
 
 :show_logs
@@ -113,12 +113,12 @@ echo 5. NATS
 echo 6. Nginx
 set /p log_choice="Selecciona (1-6): "
 
-if "%log_choice%"=="1" docker-compose logs -f
-if "%log_choice%"=="2" docker-compose logs -f orders-service
-if "%log_choice%"=="3" docker-compose logs -f products-service
-if "%log_choice%"=="4" docker-compose logs -f notifications-service
-if "%log_choice%"=="5" docker-compose logs -f nats-server
-if "%log_choice%"=="6" docker-compose logs -f nginx
+if "%log_choice%"=="1" %DOCKER_COMPOSE_CMD% logs -f
+if "%log_choice%"=="2" %DOCKER_COMPOSE_CMD% logs -f orders-service
+if "%log_choice%"=="3" %DOCKER_COMPOSE_CMD% logs -f products-service
+if "%log_choice%"=="4" %DOCKER_COMPOSE_CMD% logs -f notifications-service
+if "%log_choice%"=="5" %DOCKER_COMPOSE_CMD% logs -f nats-server
+if "%log_choice%"=="6" %DOCKER_COMPOSE_CMD% logs -f nginx
 goto end
 
 :invalid_option
@@ -136,10 +136,21 @@ if errorlevel 1 (
     exit /b 1
 )
 
-docker-compose --version >nul 2>&1
+REM Verificar Docker Compose (nueva versión integrada o standalone)
+docker compose version >nul 2>&1
 if errorlevel 1 (
-    echo ❌ Docker Compose no está instalado
-    exit /b 1
+    docker-compose --version >nul 2>&1
+    if errorlevel 1 (
+        echo ❌ Docker Compose no está disponible
+        echo    Instala Docker Compose o actualiza Docker a una versión que lo incluya
+        exit /b 1
+    ) else (
+        echo ✅ Usando Docker Compose (standalone)
+        set DOCKER_COMPOSE_CMD=docker-compose
+    )
+) else (
+    echo ✅ Usando Docker Compose (integrado)
+    set DOCKER_COMPOSE_CMD=docker compose
 )
 
 mvn --version >nul 2>&1
@@ -152,7 +163,7 @@ echo ✅ Todas las dependencias están disponibles
 exit /b 0
 
 :cleanup
-docker-compose down --remove-orphans 2>nul
+%DOCKER_COMPOSE_CMD% down --remove-orphans 2>nul
 docker system prune -f 2>nul
 exit /b 0
 
@@ -183,13 +194,13 @@ echo ✅ Todos los servicios construidos exitosamente
 exit /b 0
 
 :build_images
-docker-compose build --no-cache
+%DOCKER_COMPOSE_CMD% build --no-cache
 if errorlevel 1 exit /b 1
 echo ✅ Imágenes Docker construidas exitosamente
 exit /b 0
 
 :deploy
-docker-compose up -d
+%DOCKER_COMPOSE_CMD% up -d
 if errorlevel 1 exit /b 1
 echo ✅ Servicios desplegados exitosamente
 exit /b 0
@@ -213,7 +224,7 @@ echo   • Orders Service:        http://localhost/orders-app
 echo   • Products Service:      http://localhost/products
 echo   • Notifications Service: http://localhost/notifications-app
 echo   • H2 Console:           http://localhost/h2-console
-echo   • NATS Monitoring:      http://localhost:8222
+echo   • NATS Monitoring:      http://localhost:8423
 echo.
 echo 🔍 Health Checks:
 echo   • General:              http://localhost/health
@@ -222,8 +233,8 @@ echo   • Products:             http://localhost/health/products
 echo   • Notifications:        http://localhost/health/notifications
 echo.
 echo 📊 Logs:
-echo   • Ver todos los logs:   docker-compose logs -f
-echo   • Ver logs específicos: docker-compose logs -f [service-name]
+echo   • Ver todos los logs:   %DOCKER_COMPOSE_CMD% logs -f
+echo   • Ver logs específicos: %DOCKER_COMPOSE_CMD% logs -f [service-name]
 echo.
 exit /b 0
 
