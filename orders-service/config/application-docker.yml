@@ -5,18 +5,10 @@ server:
 spring:
   application:
     name: orders-service
-  profiles:
-    active: docker
-  web:
-    resources:
-      static-locations:
-      - file:/app/public/
-      - classpath:/static/
-      - classpath:/public/
+  # Eliminar spring.profiles.active de aquí
 
-# NATS Configuration para Docker (instancia dedicada)
 nats:
-  url: nats://nats-server:4222  # Puerto interno del contenedor (sigue siendo 4222)
+  url: nats://nats-server:4222  # Usar nombre del servicio de Docker
   connection:
     timeout: 5000               # Aumentar timeout para Docker
     max-reconnect: 60
@@ -31,6 +23,24 @@ nats:
     timeout: 5000               # Aumentar timeout
   cluster:
     enabled: false
+    
+# Configuración de subjects para el servicio de órdenes
+messaging:
+  subjects:
+    orders:
+      created: "orders.created"
+      updated: "orders.updated"
+      cancelled: "orders.cancelled"
+      status-changed: "orders.status.changed"
+    notifications:
+      send: "notifications.send"
+    products:
+      check-inventory: "products.inventory.check"
+      update-inventory: "products.inventory.update"
+    payments:
+      process: "payments.process"
+      confirmed: "payments.confirmed"
+      failed: "payments.failed"
 
 # Configuración de logs para Docker
 logging:
@@ -41,12 +51,20 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
-# Actuator para health checks
+# Actuator Configuration for Docker
 management:
   endpoints:
     web:
+      base-path: /actuator
       exposure:
         include: health,info,metrics
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true

@@ -2,8 +2,6 @@
 # Versión: 1.0
 # Servicios: orders, products, notifications + NATS + nginx
 
-version: '3.8'
-
 services:
   # ========================================
   # NATS Server (Message Broker) - Instancia dedicada para Mini-Shop
@@ -47,6 +45,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - JAVA_OPTS=-Xmx512m -Xms256m
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
     depends_on:
       nats-server:
         condition: service_healthy
@@ -56,7 +56,7 @@ services:
       - mini-shop-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -122,28 +122,19 @@ services:
   # Nginx (Reverse Proxy y Load Balancer)
   # ========================================
   nginx:
-    image: nginx:1.25-alpine
-    container_name: mini-shop-nginx
+    image: nginx:alpine
     ports:
-      - "8088:8088"      # Puerto 8088 para evitar conflictos
-      - "8443:443"       # HTTPS en puerto alternativo
+      - "8088:80"  # Puerto fácil de cambiar
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - nginx_logs:/var/log/nginx
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/html:/usr/share/nginx/html     # Para página estática
+      - ./nginx/proxy_params:/etc/nginx/proxy_params
     depends_on:
       - orders-service
       - products-service
       - notifications-service
     networks:
       - mini-shop-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "nginx", "-t"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 # ========================================
 # Networks

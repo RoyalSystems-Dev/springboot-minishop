@@ -33,6 +33,19 @@ print_error() {
     echo -e "${RED}❌ $1${NC}"
 }
 
+# Variables
+PROJECT_NAME="mini-shop"
+VERSION=$(date +%Y%m%d-%H%M%S)
+
+# Set Docker Compose command based on availability
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+else
+    DOCKER_COMPOSE_CMD=""
+fi
+
 # Verificar dependencias
 check_dependencies() {
     print_step "Verificando dependencias..."
@@ -42,14 +55,8 @@ check_dependencies() {
         exit 1
     fi
     
-    # Verificar Docker Compose (nueva versión integrada o standalone)
-    if docker compose version &> /dev/null; then
-        echo "✅ Usando Docker Compose (integrado): $(docker compose version --short)"
-        DOCKER_COMPOSE_CMD="docker compose"
-    elif command -v docker-compose &> /dev/null; then
-        echo "✅ Usando Docker Compose (standalone): $(docker-compose version --short)"
-        DOCKER_COMPOSE_CMD="docker-compose"
-    else
+    # Verificar Docker Compose
+    if [ -z "$DOCKER_COMPOSE_CMD" ]; then
         print_error "Docker Compose no está disponible"
         print_error "Instala Docker Compose o actualiza Docker a una versión que lo incluya"
         exit 1
@@ -66,7 +73,9 @@ check_dependencies() {
 # Limpiar containers anteriores
 cleanup() {
     print_step "Limpiando containers anteriores..."
-    $    $DOCKER_COMPOSE_CMD down --remove-orphans || true
+    if [ -n "$DOCKER_COMPOSE_CMD" ]; then
+        ${DOCKER_COMPOSE_CMD} down --remove-orphans || true
+    fi
     docker system prune -f || true
 }
 
