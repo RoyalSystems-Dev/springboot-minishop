@@ -5,6 +5,12 @@ server:
 spring:
   application:
     name: products-service
+  web:
+    resources:
+      static-locations:
+      - file:/app/public/
+      - classpath:/static/
+      - classpath:/public/
 
 # NATS Configuration para Docker (instancia dedicada)
 nats:
