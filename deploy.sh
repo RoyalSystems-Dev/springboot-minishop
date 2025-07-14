@@ -177,10 +177,6 @@ show_info() {
     echo "  • Ver todos los logs:   $DOCKER_COMPOSE_CMD logs -f"
     echo "  • Ver logs específicos: $DOCKER_COMPOSE_CMD logs -f [service-name]"
     echo ""
-    echo "💡 Configuración Puerto 8088:"
-    echo "  • Evita conflictos con Nginx existente en puerto 80"
-    echo "  • Para puerto 80 original, usa docker-compose.original.yml"
-    echo ""
 }
 
 # Función principal
