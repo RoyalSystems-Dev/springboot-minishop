@@ -5,7 +5,6 @@ server:
 spring:
   application:
     name: orders-service
-  # Eliminar spring.profiles.active de aquí
 
 nats:
   url: nats://nats-server:4222  # Usar nombre del servicio de Docker

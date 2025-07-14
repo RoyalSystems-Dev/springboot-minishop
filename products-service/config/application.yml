@@ -13,7 +13,7 @@ spring:
 
 # NATS Configuration
 nats:
-  url: nats://localhost:4222
+  url: nats://localhost:8422
   connection:
     timeout: 2000
     max-reconnect: 60
@@ -47,3 +47,12 @@ messaging:
       send: "notifications.send"
 
   
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

@@ -5,8 +5,6 @@ server:
 spring:
   application:
     name: products-service
-  profiles:
-    active: docker
 
 # NATS Configuration para Docker (instancia dedicada)
 nats:
@@ -44,3 +42,19 @@ management:
   endpoint:
     health:
       show-details: always
+# Configuración de subjects para el servicio de productos
+messaging:
+  subjects:
+    products:
+      created: "products.created"
+      updated: "products.updated"
+      deleted: "products.deleted"
+      inventory-check: "products.inventory.check"
+      inventory-update: "products.inventory.update"
+      low-stock: "products.stock.low"
+    orders:
+      created: "orders.created"
+      updated: "orders.updated"
+      cancelled: "orders.cancelled"
+    notifications:
+      send: "notifications.send"
