@@ -5,8 +5,6 @@ server:
 spring:
   application:
     name: notifications-service
-  profiles:
-    active: docker
   web:
     resources:
       static-locations:
@@ -53,6 +51,42 @@ nats:
   producer:
     max-pending: 1000
     timeout: 5000               # Aumentar timeout
+
+# Configuración de subjects para el servicio de notificaciones
+messaging:
+  subjects:
+    notifications:
+      send: "notifications.send"
+      email: "notifications.email"
+      sms: "notifications.sms"
+      push: "notifications.push"
+    orders:
+      created: "orders.created"
+      updated: "orders.updated"
+      cancelled: "orders.cancelled"
+      status-changed: "orders.status.changed"
+    products:
+      low-stock: "products.stock.low"
+    payments:
+      confirmed: "payments.confirmed"
+      failed: "payments.failed"
+
+# Configuración de canales de notificación
+notification:
+  channels:
+    email:
+      enabled: true
+      smtp-host: "localhost"
+      smtp-port: 587
+      username: "noreply@minishop.com"
+      password: "password"
+    sms:
+      enabled: false
+      provider: "twilio"
+      api-key: "your-api-key"
+    push:
+      enabled: false
+      firebase-key: "your-firebase-key"
 
 # Configuración de logs para Docker
 logging:
