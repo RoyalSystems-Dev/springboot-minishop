@@ -20,6 +20,9 @@ RUN groupadd -r spring && useradd -r -g spring spring
 # Copiar el JAR construido
 COPY target/products-service-*.jar app.jar
 
+# Copiar archivos estáticos (public)
+COPY public/ /app/public/
+
 # Cambiar propietario de los archivos
 RUN chown -R spring:spring /app
 
