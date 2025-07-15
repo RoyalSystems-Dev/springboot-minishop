@@ -92,9 +92,7 @@ services:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=docker-swarm
-      - JAVA_OPTS=-Xmx512m -Xms256m
-      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics
-      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+      - JAVA_OPTS=-Xmx768m -Xms512m
     # 🔥 USAR CONFIGS EN LUGAR DE VOLUMES
     configs:
       - source: orders-service-config
@@ -104,30 +102,24 @@ services:
       - mini-shop-network
     # 🔥 CONFIGURACIÓN PARA SWARM
     deploy:
-      replicas: 4                    # 4 instancias del servicio
+      replicas: 1                    # instancias del servicio
       placement:
         constraints:
           - node.role == worker      # Solo en nodos worker
         preferences:
-          - spread: node.labels.zone # Distribuir por zonas si están etiquetadas
+          - spread: node.id          # Distribuir en diferentes nodos
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 3
         window: 120s
-      update_config:
-        parallelism: 2              # Actualizar de a 2 por vez
-        delay: 10s
-        failure_action: rollback
-        monitor: 60s
-        max_failure_ratio: 0.3
       resources:
         limits:
-          cpus: '1.0'
-          memory: 1024M
+          cpus: '0.8'
+          memory: 768M
         reservations:
           cpus: '0.5'
-          memory: 512M
+          memory: 384M
       labels:
         - "service.name=orders-service"
         - "service.type=api"
@@ -147,7 +139,7 @@ services:
       - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=docker-swarm
-      - JAVA_OPTS=-Xmx512m -Xms256m
+      - JAVA_OPTS=-Xmx768m -Xms512m
     # 🔥 USAR CONFIGS EN LUGAR DE VOLUMES
     configs:
       - source: products-service-config
@@ -157,7 +149,7 @@ services:
       - mini-shop-network
     # 🔥 CONFIGURACIÓN PARA SWARM
     deploy:
-      replicas: 3                    # 3 instancias del servicio
+      replicas: 1                    # instancias del servicio
       placement:
         constraints:
           - node.role == worker      # Solo en nodos worker
@@ -198,7 +190,7 @@ services:
       - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=docker-swarm
-      - JAVA_OPTS=-Xmx512m -Xms256m
+      - JAVA_OPTS=-Xmx768m -Xms512m
     # 🔥 USAR CONFIGS EN LUGAR DE VOLUMES
     configs:
       - source: notifications-service-config
@@ -208,7 +200,7 @@ services:
       - mini-shop-network
     # 🔥 CONFIGURACIÓN PARA SWARM
     deploy:
-      replicas: 2                    # 2 instancias del servicio
+      replicas: 1                    # instancias del servicio
       placement:
         constraints:
           - node.role == worker      # Solo en nodos worker
