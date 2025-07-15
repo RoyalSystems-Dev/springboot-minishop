@@ -1,81 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini-Shop Portal</title>
+    <title>Mini-Shop - Microservices</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
-            margin: 0; 
-            padding: 20px;
+            margin: 40px; 
             background: #f5f5f5; 
         }
         .container { 
-            max-width: 1200px; 
+            max-width: 800px; 
             margin: 0 auto; 
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
         }
-        .header { text-align: center; margin-bottom: 30px; }
-        .services { 
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+        h1 { color: #333; text-align: center; }
+        .service { 
+            margin: 20px 0; 
+            padding: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
         }
-        .service {
-            border: 1px solid #ddd;
-            padding: 20px;
-            border-radius: 8px;
-            background: #f9f9f9;
+        .service h3 { 
+            color: #2c3e50; 
+            margin-top: 0; 
         }
-        .service h3 { margin-top: 0; }
-        .service a {
-            display: inline-block;
-            margin: 5px;
-            padding: 8px 16px;
-            background: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
+        a { 
+            color: #3498db; 
+            text-decoration: none; 
         }
-        .service a:hover { background: #0056b3; }
+        a:hover { 
+            text-decoration: underline; 
+        }
+        .status { 
+            display: inline-block; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 12px; 
+        }
+        .running { 
+            background: #d4edda; 
+            color: #155724; 
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🏪 Mini-Shop Portal</h1>
-            <p>Sistema de Microservicios</p>
+        <h1>🛍️ Mini-Shop Microservices</h1>
+        <p>Bienvenido al sistema de microservicios Mini-Shop desplegado en Docker Swarm</p>
+        
+        <div class="service">
+            <h3>📦 Orders Service <span class="status running">RUNNING</span></h3>
+            <p>Gestión de pedidos y órdenes</p>
+            <ul>
+                <li><a href="/orders" target="_blank">API Orders</a></li>
+                <li><a href="/orders-app" target="_blank">Orders App</a></li>
+                <li><a href="/health/orders" target="_blank">Health Check</a></li>
+            </ul>
         </div>
         
-        <div class="services">
-            <div class="service">
-                <h3>📦 Orders Service</h3>
-                <p>Gestión de pedidos</p>
-                <a href="/orders-app">Interfaz</a>
-                <a href="/orders">API</a>
-                <a href="/health/orders">Health</a>
-            </div>
-            
-            <div class="service">
-                <h3>🛍️ Products Service</h3>
-                <p>Catálogo de productos</p>
-                <a href="/products-app">Interfaz</a>
-                <a href="/products">API</a>
-                <a href="/health/products">Health</a>
-            </div>
-            
-            <div class="service">
-                <h3>🔔 Notifications Service</h3>
-                <p>Sistema de notificaciones</p>
-                <a href="/notifications-app">Interfaz</a>
-                <a href="/notifications">API</a>
-                <a href="/h2-console">H2 Console</a>
-                <a href="/health/notifications">Health</a>
-            </div>
+        <div class="service">
+            <h3>🛒 Products Service <span class="status running">RUNNING</span></h3>
+            <p>Catálogo y gestión de productos</p>
+            <ul>
+                <li><a href="/products" target="_blank">API Products</a></li>
+                <li><a href="/products-app" target="_blank">Products App</a></li>
+                <li><a href="/health/products" target="_blank">Health Check</a></li>
+            </ul>
+        </div>
+        
+        <div class="service">
+            <h3>🔔 Notifications Service <span class="status running">RUNNING</span></h3>
+            <p>Sistema de notificaciones</p>
+            <ul>
+                <li><a href="/notifications" target="_blank">API Notifications</a></li>
+                <li><a href="/notifications-app" target="_blank">Notifications App</a></li>
+                <li><a href="/health/notifications" target="_blank">Health Check</a></li>
+            </ul>
+        </div>
+        
+        <div class="service">
+            <h3>💾 Database Console</h3>
+            <p>Consola de base de datos H2</p>
+            <ul>
+                <li><a href="/h2-console" target="_blank">H2 Console</a></li>
+            </ul>
+        </div>
+        
+        <div class="service">
+            <h3>🔍 System Health</h3>
+            <p>Estado general del sistema</p>
+            <ul>
+                <li><a href="/health" target="_blank">System Health</a></li>
+                <li><a href="http://localhost:8423" target="_blank">NATS Monitoring</a></li>
+            </ul>
         </div>
     </div>
 </body>

@@ -1,5 +1,22 @@
 version: '3.8'
 
+# ========================================
+# CONFIGS - Configuraciones para Swarm
+# ========================================
+configs:
+  orders-service-config:
+    file: ./orders-service/config/application-docker-swarm.yml
+  products-service-config:
+    file: ./products-service/config/application-docker-swarm.yml
+  notifications-service-config:
+    file: ./notifications-service/config/application-docker-swarm.yml
+  nginx-default-config:
+    file: ./nginx/conf.d/default.conf
+  nginx-proxy-params:
+    file: ./nginx/proxy_params
+  nginx-index-html:
+    file: ./nginx/html/index.html
+
 services:
   # ========================================
   # NATS Server (Message Broker) - Instancia dedicada para Mini-Shop
@@ -78,8 +95,11 @@ services:
       - JAVA_OPTS=-Xmx512m -Xms256m
       - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics
       - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
-    volumes:
-      - ./orders-service/config:/app/config:ro
+    # 🔥 USAR CONFIGS EN LUGAR DE VOLUMES
+    configs:
+      - source: orders-service-config
+        target: /app/config/application-docker-swarm.yml
+        mode: 0444
     networks:
       - mini-shop-network
     # 🔥 CONFIGURACIÓN PARA SWARM
@@ -128,8 +148,11 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker-swarm
       - JAVA_OPTS=-Xmx512m -Xms256m
-    volumes:
-      - ./products-service/config:/app/config:ro
+    # 🔥 USAR CONFIGS EN LUGAR DE VOLUMES
+    configs:
+      - source: products-service-config
+        target: /app/config/application-docker-swarm.yml
+        mode: 0444
     networks:
       - mini-shop-network
     # 🔥 CONFIGURACIÓN PARA SWARM
@@ -176,8 +199,11 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker-swarm
       - JAVA_OPTS=-Xmx512m -Xms256m
-    volumes:
-      - ./notifications-service/config:/app/config:ro
+    # 🔥 USAR CONFIGS EN LUGAR DE VOLUMES
+    configs:
+      - source: notifications-service-config
+        target: /app/config/application-docker-swarm.yml
+        mode: 0444
     networks:
       - mini-shop-network
     # 🔥 CONFIGURACIÓN PARA SWARM
@@ -220,10 +246,17 @@ services:
     image: nginx:alpine
     ports:
       - "8088:80"  # Puerto fácil de cambiar
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/html:/usr/share/nginx/html     # Para página estática
-      - ./nginx/proxy_params:/etc/nginx/proxy_params
+    # 🔥 USAR CONFIGS EN LUGAR DE VOLUMES
+    configs:
+      - source: nginx-default-config
+        target: /etc/nginx/conf.d/default.conf
+        mode: 0444
+      - source: nginx-proxy-params
+        target: /etc/nginx/proxy_params
+        mode: 0444
+      - source: nginx-index-html
+        target: /usr/share/nginx/html/index.html
+        mode: 0444
     networks:
       - mini-shop-network
     # 🔥 CONFIGURACIÓN PARA SWARM
