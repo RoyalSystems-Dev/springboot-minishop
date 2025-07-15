@@ -6,7 +6,6 @@ services:
   # ========================================
   nats-server:
     image: nats:2.10-alpine
-    container_name: mini-shop-nats
     ports:
       - "8422:4222"      # NATS Client Port (puerto externo 8422)
       - "8423:8222"      # HTTP Monitoring Port (puerto externo 8423)
@@ -25,7 +24,41 @@ services:
       - nats_data:/data
     networks:
       - mini-shop-network
-    restart: unless-stopped
+    # 🔥 CONFIGURACIÓN PARA SWARM
+    deploy:
+      replicas: 3                    # 3 instancias de NATS
+      placement:
+        constraints:
+          - node.role == manager     # Solo en nodos manager
+        preferences:
+          - spread: node.id          # Distribuir en diferentes nodos
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        parallelism: 1              # Actualizar de a 1 por vez
+        delay: 10s
+        failure_action: rollback
+        monitor: 60s
+        max_failure_ratio: 0.3
+      rollback_config:
+        parallelism: 1
+        delay: 0s
+        failure_action: pause
+        monitor: 60s
+        max_failure_ratio: 0.3
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+      labels:
+        - "service.name=nats-server"
+        - "service.version=2.10"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8222/healthz"]
       interval: 30s
@@ -40,22 +73,46 @@ services:
     build:
       context: ./orders-service
       dockerfile: Dockerfile
-    container_name: mini-shop-orders
     ports:
       - "8081:8081"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_PROFILES_ACTIVE=docker-swarm
       - JAVA_OPTS=-Xmx512m -Xms256m
       - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics
       - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
-    depends_on:
-      nats-server:
-        condition: service_healthy
     volumes:
       - ./orders-service/config:/app/config:ro
     networks:
       - mini-shop-network
-    restart: unless-stopped
+    # 🔥 CONFIGURACIÓN PARA SWARM
+    deploy:
+      replicas: 4                    # 4 instancias del servicio
+      placement:
+        constraints:
+          - node.role == worker      # Solo en nodos worker
+        preferences:
+          - spread: node.labels.zone # Distribuir por zonas si están etiquetadas
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        parallelism: 2              # Actualizar de a 2 por vez
+        delay: 10s
+        failure_action: rollback
+        monitor: 60s
+        max_failure_ratio: 0.3
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+      labels:
+        - "service.name=orders-service"
+        - "service.type=api"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health || exit 1"]
       interval: 30s
@@ -70,20 +127,42 @@ services:
     build:
       context: ./products-service
       dockerfile: Dockerfile
-    container_name: mini-shop-products
     ports:
       - "8082:8082"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_PROFILES_ACTIVE=docker-swarm
       - JAVA_OPTS=-Xmx512m -Xms256m
-    depends_on:
-      nats-server:
-        condition: service_healthy
     volumes:
       - ./products-service/config:/app/config:ro
     networks:
       - mini-shop-network
-    restart: unless-stopped
+    # 🔥 CONFIGURACIÓN PARA SWARM
+    deploy:
+      replicas: 3                    # 3 instancias del servicio
+      placement:
+        constraints:
+          - node.role == worker      # Solo en nodos worker
+          - node.labels.type != database  # No en nodos marcados como database
+        preferences:
+          - spread: node.id          # Distribuir en diferentes nodos
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      resources:
+        limits:
+          cpus: '0.8'
+          memory: 768M
+        reservations:
+          cpus: '0.4'
+          memory: 384M
+      labels:
+        - "service.name=products-service"
+        - "service.type=api"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
       interval: 30s
@@ -98,20 +177,41 @@ services:
     build:
       context: ./notifications-service
       dockerfile: Dockerfile
-    container_name: mini-shop-notifications
     ports:
       - "8083:8083"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_PROFILES_ACTIVE=docker-swarm
       - JAVA_OPTS=-Xmx512m -Xms256m
-    depends_on:
-      nats-server:
-        condition: service_healthy
     volumes:
       - ./notifications-service/config:/app/config:ro
     networks:
       - mini-shop-network
-    restart: unless-stopped
+    # 🔥 CONFIGURACIÓN PARA SWARM
+    deploy:
+      replicas: 2                    # 2 instancias del servicio
+      placement:
+        constraints:
+          - node.role == worker      # Solo en nodos worker
+        preferences:
+          - spread: node.id          # Distribuir en diferentes nodos
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+      labels:
+        - "service.name=notifications-service"
+        - "service.type=api"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
       interval: 30s
@@ -130,20 +230,46 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/html:/usr/share/nginx/html     # Para página estática
       - ./nginx/proxy_params:/etc/nginx/proxy_params
-    depends_on:
-      - orders-service
-      - products-service
-      - notifications-service
     networks:
       - mini-shop-network
+    # 🔥 CONFIGURACIÓN PARA SWARM
+    deploy:
+      replicas: 2                    # 2 instancias de Nginx
+      placement:
+        constraints:
+          - node.role == manager     # Solo en nodos manager (entrada al cluster)
+        preferences:
+          - spread: node.id          # Distribuir en diferentes managers
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+      labels:
+        - "service.name=nginx"
+        - "service.type=proxy"
 
 # ========================================
-# Networks
+# Networks - Para Swarm usa overlay
 # ========================================
 networks:
   mini-shop-network:
-    driver: bridge
+    driver: overlay                  # Cambiar de bridge a overlay para Swarm
     name: mini-shop-net
+    attachable: true
+    ipam:
+      config:
+        - subnet: 10.0.9.0/24
 
 # ========================================
 # Volumes
