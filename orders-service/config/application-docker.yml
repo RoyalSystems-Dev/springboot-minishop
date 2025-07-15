@@ -5,6 +5,12 @@ server:
 spring:
   application:
     name: orders-service
+  web:
+    resources:
+      static-locations:
+      - file:${user.dir}/public/
+      - classpath:/static/
+      - classpath:/public/
 
 nats:
   url: nats://nats-server:4222  # Usar nombre del servicio de Docker
