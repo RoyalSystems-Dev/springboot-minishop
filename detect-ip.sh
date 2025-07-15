@@ -316,6 +316,186 @@ select_ip_interactive() {
     fi
 }
 
+# Función para configurar DinD managers
+setup_dind_managers() {
+    echo "🐳 Configuración de Managers DinD"
+    echo "================================="
+    echo ""
+    
+    print_warning "⚠️  ADVERTENCIA: DinD es solo para desarrollo/testing"
+    print_warning "     No usar en producción"
+    echo ""
+    
+    echo "¿Cuántos managers DinD quieres crear?"
+    echo "  1. 1 Manager (sin tolerancia a fallos)"
+    echo "  2. 3 Managers (tolerancia: 1 fallo)"
+    echo "  3. 5 Managers (tolerancia: 2 fallos)"
+    echo ""
+    
+    read -p "Selecciona (1-3): " manager_choice
+    
+    case $manager_choice in
+        1) MANAGERS_COUNT=1 ;;
+        2) MANAGERS_COUNT=3 ;;
+        3) MANAGERS_COUNT=5 ;;
+        *) echo "Opción inválida"; return 1 ;;
+    esac
+    
+    read -p "¿Cuántos workers DinD? (0-5): " workers_count
+    
+    if [ "$workers_count" -lt 0 ] || [ "$workers_count" -gt 5 ]; then
+        echo "❌ Número inválido de workers"
+        return 1
+    fi
+    
+    echo ""
+    echo "📊 Configuración seleccionada:"
+    echo "  • Managers: $MANAGERS_COUNT"
+    echo "  • Workers: $workers_count"
+    echo "  • Total nodos: $((MANAGERS_COUNT + workers_count))"
+    echo ""
+    
+    read -p "¿Continuar? (y/n): " confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        # Crear script de configuración
+        cat > setup-dind-cluster.sh << 'EOF'
+#!/bin/bash
+# Script generado automáticamente para configurar DinD cluster
+
+MANAGERS_COUNT=__MANAGERS_COUNT__
+WORKERS_COUNT=__WORKERS_COUNT__
+NETWORK_NAME="swarm-dind-network"
+
+# Función para crear red
+create_network() {
+    echo "🌐 Creando red DinD..."
+    docker network create \
+        --driver bridge \
+        --subnet=172.20.0.0/16 \
+        $NETWORK_NAME 2>/dev/null || true
+}
+
+# Función para crear managers
+create_managers() {
+    echo "👥 Creando $MANAGERS_COUNT managers..."
+    
+    for i in $(seq 1 $MANAGERS_COUNT); do
+        echo "  Creando dind-manager-$i..."
+        
+        docker run -d \
+            --name dind-manager-$i \
+            --hostname dind-manager-$i \
+            --network $NETWORK_NAME \
+            --ip 172.20.0.$((9 + i)) \
+            --privileged \
+            --publish $((2377 + i - 1)):2377 \
+            --volume /var/lib/docker \
+            --restart unless-stopped \
+            docker:24-dind
+        
+        sleep 5
+    done
+}
+
+# Función para crear workers
+create_workers() {
+    if [ $WORKERS_COUNT -eq 0 ]; then
+        return 0
+    fi
+    
+    echo "🔨 Creando $WORKERS_COUNT workers..."
+    
+    for i in $(seq 1 $WORKERS_COUNT); do
+        echo "  Creando dind-worker-$i..."
+        
+        docker run -d \
+            --name dind-worker-$i \
+            --hostname dind-worker-$i \
+            --network $NETWORK_NAME \
+            --ip 172.20.0.$((20 + i)) \
+            --privileged \
+            --publish $((8080 + i)):8080 \
+            --volume /var/lib/docker \
+            --restart unless-stopped \
+            docker:24-dind
+        
+        sleep 5
+    done
+}
+
+# Función para inicializar swarm
+init_swarm() {
+    echo "🚀 Inicializando Swarm..."
+    
+    # Inicializar en primer manager
+    docker exec dind-manager-1 docker swarm init --advertise-addr 172.20.0.10
+    
+    # Obtener tokens
+    MANAGER_TOKEN=$(docker exec dind-manager-1 docker swarm join-token manager -q)
+    WORKER_TOKEN=$(docker exec dind-manager-1 docker swarm join-token worker -q)
+    
+    # Unir managers adicionales
+    for i in $(seq 2 $MANAGERS_COUNT); do
+        echo "  Uniendo dind-manager-$i..."
+        docker exec dind-manager-$i docker swarm join \
+            --token $MANAGER_TOKEN \
+            172.20.0.10:2377
+    done
+    
+    # Unir workers
+    for i in $(seq 1 $WORKERS_COUNT); do
+        echo "  Uniendo dind-worker-$i..."
+        docker exec dind-worker-$i docker swarm join \
+            --token $WORKER_TOKEN \
+            172.20.0.10:2377
+    done
+}
+
+# Función principal
+main() {
+    echo "🐳 Configurando cluster DinD..."
+    
+    create_network
+    create_managers
+    create_workers
+    
+    echo "⏳ Esperando que Docker daemons estén listos..."
+    sleep 20
+    
+    init_swarm
+    
+    echo ""
+    echo "✅ Cluster DinD configurado!"
+    echo ""
+    echo "📊 Estado del cluster:"
+    docker exec dind-manager-1 docker node ls
+    
+    echo ""
+    echo "🔗 Accesos:"
+    for i in $(seq 1 $MANAGERS_COUNT); do
+        echo "  • Manager $i: localhost:$((2377 + i - 1))"
+    done
+}
+
+# Ejecutar
+main
+EOF
+
+        # Reemplazar variables
+        sed -i "s/__MANAGERS_COUNT__/$MANAGERS_COUNT/g" setup-dind-cluster.sh
+        sed -i "s/__WORKERS_COUNT__/$workers_count/g" setup-dind-cluster.sh
+        
+        chmod +x setup-dind-cluster.sh
+        
+        echo "✅ Script generado: setup-dind-cluster.sh"
+        echo ""
+        read -p "¿Ejecutar ahora? (y/n): " run_now
+        if [[ "$run_now" =~ ^[Yy]$ ]]; then
+            ./setup-dind-cluster.sh
+        fi
+    fi
+}
+
 # Menú principal
 main() {
     case "${1:-auto}" in
@@ -341,6 +521,9 @@ main() {
         "nodes")
             manage_remote_nodes
             ;;
+        "dind")
+            setup_dind_managers
+            ;;
         "status")
             local status=$(check_swarm_status)
             echo "Estado del Swarm: $status"
@@ -349,7 +532,7 @@ main() {
             fi
             ;;
         *)
-            echo "Uso: $0 [auto|detect|interactive|validate|tokens|nodes|status]"
+            echo "Uso: $0 [auto|detect|interactive|validate|tokens|nodes|dind|status]"
             echo ""
             echo "Opciones:"
             echo "  auto        - Detectar y usar automáticamente"
@@ -358,6 +541,7 @@ main() {
             echo "  validate    - Validar una IP específica"
             echo "  tokens      - Mostrar tokens de unión"
             echo "  nodes       - Gestionar nodos remotos"
+            echo "  dind        - Configurar managers DinD (desarrollo)"
             echo "  status      - Mostrar estado del Swarm"
             exit 1
             ;;
