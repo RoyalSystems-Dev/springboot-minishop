@@ -5,14 +5,18 @@
 detect_best_ip() {
     echo "🔍 Detectando IPs disponibles..."
     
-    # Método 1: IP de la ruta por defecto
-    DEFAULT_IP=$(ip route get 1.1.1.1 2>/dev/null | head -1 | awk '{print $7}')
-    
-    # Método 2: IP de la interfaz principal
-    MAIN_IP=$(hostname -I | awk '{print $1}')
-    
-    # Método 3: Todas las IPs privadas
-    PRIVATE_IPS=$(ip addr show | grep -E "inet (192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)" | awk '{print $2}' | cut -d'/' -f1)
+    # Adaptado para Windows/WSL
+    if command -v ip &> /dev/null; then
+        # Linux/WSL
+        DEFAULT_IP=$(ip route get 1.1.1.1 2>/dev/null | head -1 | awk '{print $7}')
+        MAIN_IP=$(hostname -I | awk '{print $1}')
+        PRIVATE_IPS=$(ip addr show | grep -E "inet (192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)" | awk '{print $2}' | cut -d'/' -f1)
+    else
+        # Windows (usando PowerShell)
+        DEFAULT_IP=$(powershell.exe -Command "Get-NetRoute -DestinationPrefix 0.0.0.0/0 | Get-NetIPAddress | Where-Object AddressFamily -eq IPv4 | Select-Object -First 1 -ExpandProperty IPAddress" 2>/dev/null)
+        MAIN_IP=$(powershell.exe -Command "Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.IPAddress -notmatch '127\.|169\.254\.'} | Select-Object -First 1 -ExpandProperty IPAddress" 2>/dev/null)
+        PRIVATE_IPS=$(powershell.exe -Command "Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.IPAddress -match '^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)'} | Select-Object -ExpandProperty IPAddress" 2>/dev/null)
+    fi
     
     echo "📊 IPs detectadas:"
     echo "  • IP por defecto: ${DEFAULT_IP:-'No detectada'}"
@@ -39,6 +43,50 @@ detect_best_ip() {
     echo $SELECTED_IP
 }
 
+# Función para verificar estado del Swarm
+check_swarm_status() {
+    local swarm_state=$(docker info --format '{{.Swarm.LocalNodeState}}' 2>/dev/null)
+    local is_manager=$(docker info --format '{{.Swarm.ControlAvailable}}' 2>/dev/null)
+    
+    case "$swarm_state" in
+        "active")
+            if [ "$is_manager" = "true" ]; then
+                echo "MANAGER"
+            else
+                echo "WORKER"
+            fi
+            ;;
+        "inactive")
+            echo "INACTIVE"
+            ;;
+        "pending")
+            echo "PENDING"
+            ;;
+        "error")
+            echo "ERROR"
+            ;;
+        *)
+            echo "UNKNOWN"
+            ;;
+    esac
+}
+
+# Función para mostrar tokens de union
+show_join_tokens() {
+    echo "🔗 Tokens para unir nodos al cluster:"
+    echo ""
+    echo "📋 Para agregar un WORKER:"
+    echo "   Ve a la máquina worker y ejecuta:"
+    docker swarm join-token worker
+    echo ""
+    echo "📋 Para agregar un MANAGER:"
+    echo "   Ve a la máquina manager y ejecuta:"
+    docker swarm join-token manager
+    echo ""
+    echo "⚠️  IMPORTANTE: Debes ejecutar estos comandos en las máquinas remotas,"
+    echo "   NO desde esta máquina (10.0.1.14)"
+}
+
 # Función para validar IP
 validate_ip() {
     local ip=$1
@@ -53,11 +101,11 @@ validate_ip() {
             fi
         done
         
-        # Verificar que la IP esté asignada a una interfaz
-        if ip addr show | grep -q "inet $ip/"; then
+        # Verificar conectividad básica
+        if ping -c 1 -W 1 $ip &> /dev/null; then
             return 0
         else
-            echo "⚠️  IP $ip no está asignada a ninguna interfaz"
+            echo "⚠️  IP $ip no responde a ping"
             return 1
         fi
     else
@@ -66,8 +114,23 @@ validate_ip() {
     fi
 }
 
-# Función para inicializar swarm con IP detectada
+# Función para inicializar swarm con verificación
 init_swarm_auto() {
+    local swarm_status=$(check_swarm_status)
+    
+    echo "🔍 Verificando estado del Swarm..."
+    
+    if [ "$swarm_status" = "MANAGER" ]; then
+        echo "✅ Swarm ya está inicializado y este nodo es MANAGER"
+        echo "📍 Tu IP de manager: $(docker info --format '{{.Swarm.NodeAddr}}')"
+        show_join_tokens
+        return 0
+    elif [ "$swarm_status" = "WORKER" ]; then
+        echo "⚠️  Este nodo ya está en un Swarm como WORKER"
+        echo "No puedes inicializar un nuevo Swarm desde un worker"
+        return 1
+    fi
+    
     local ip=$(detect_best_ip)
     
     if [ -z "$ip" ]; then
@@ -78,12 +141,124 @@ init_swarm_auto() {
     echo "🚀 Inicializando Swarm con IP: $ip"
     
     if validate_ip $ip; then
-        docker swarm init --advertise-addr $ip
-        echo "✅ Swarm inicializado exitosamente"
+        if docker swarm init --advertise-addr $ip; then
+            echo "✅ Swarm inicializado exitosamente"
+            echo "📍 Tu máquina ($ip) es ahora el nodo MANAGER"
+            echo ""
+            show_join_tokens
+        else
+            echo "❌ Error al inicializar Swarm"
+            exit 1
+        fi
     else
         echo "❌ Error: IP inválida o no disponible"
         exit 1
     fi
+}
+
+# Función para gestionar nodos remotos
+manage_remote_nodes() {
+    local swarm_status=$(check_swarm_status)
+    
+    if [ "$swarm_status" != "MANAGER" ]; then
+        echo "❌ Esta función solo está disponible desde un nodo MANAGER"
+        return 1
+    fi
+    
+    echo "🌐 Gestión de Nodos Remotos"
+    echo "=========================="
+    echo ""
+    echo "📋 Nodos actuales en el cluster:"
+    docker node ls
+    echo ""
+    echo "Opciones:"
+    echo "  1. 🔗 Mostrar tokens de unión"
+    echo "  2. 📊 Verificar conectividad de nodos"
+    echo "  3. 🚀 Generar script para nodo worker"
+    echo "  4. 🔄 Rotar tokens de seguridad"
+    echo "  5. 🗑️  Remover nodo del cluster"
+    echo "  0. Volver"
+    echo ""
+    
+    read -p "Selecciona una opción: " choice
+    
+    case "$choice" in
+        1)
+            show_join_tokens
+            ;;
+        2)
+            echo "🔍 Verificando conectividad..."
+            docker node ls --format "table {{.Hostname}}\t{{.Status}}\t{{.Availability}}\t{{.ManagerStatus}}"
+            ;;
+        3)
+            generate_worker_script
+            ;;
+        4)
+            echo "🔄 Rotando tokens..."
+            docker swarm join-token --rotate worker
+            docker swarm join-token --rotate manager
+            echo "✅ Tokens rotados exitosamente"
+            ;;
+        5)
+            echo "📋 Nodos disponibles para remover:"
+            docker node ls --filter "role=worker"
+            read -p "Introduce el ID o nombre del nodo: " node_id
+            if [ ! -z "$node_id" ]; then
+                docker node rm $node_id --force
+                echo "✅ Nodo removido"
+            fi
+            ;;
+        0)
+            return 0
+            ;;
+        *)
+            echo "❌ Opción inválida"
+            ;;
+    esac
+}
+
+# Función para generar script de worker
+generate_worker_script() {
+    local manager_ip=$(docker info --format '{{.Swarm.NodeAddr}}')
+    local worker_token=$(docker swarm join-token worker -q)
+    
+    echo "📝 Generando script para nodo worker..."
+    
+    cat > join-worker.sh << EOF
+#!/bin/bash
+# Script para unir nodo worker al cluster
+# Ejecutar en la máquina worker
+
+echo "🔍 Verificando Docker..."
+if ! command -v docker &> /dev/null; then
+    echo "❌ Docker no está instalado"
+    exit 1
+fi
+
+echo "🔍 Verificando conectividad con manager..."
+if ! ping -c 1 -W 5 $manager_ip &> /dev/null; then
+    echo "❌ No se puede conectar con el manager ($manager_ip)"
+    exit 1
+fi
+
+echo "🚀 Uniéndose al cluster..."
+docker swarm join --token $worker_token $manager_ip:2377
+
+if [ \$? -eq 0 ]; then
+    echo "✅ Nodo worker unido exitosamente al cluster"
+    echo "📍 Manager: $manager_ip"
+else
+    echo "❌ Error al unirse al cluster"
+    exit 1
+fi
+EOF
+
+    chmod +x join-worker.sh
+    echo "✅ Script generado: join-worker.sh"
+    echo ""
+    echo "📋 Para usar:"
+    echo "  1. Copia join-worker.sh a la máquina worker"
+    echo "  2. Ejecuta: ./join-worker.sh"
 }
 
 # Función interactiva para seleccionar IP
@@ -91,8 +266,15 @@ select_ip_interactive() {
     echo "🔍 Selecciona la IP para Docker Swarm:"
     echo ""
     
-    # Mostrar opciones
-    local ips=($(ip addr show | grep -E "inet (192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)" | awk '{print $2}' | cut -d'/' -f1))
+    # Detectar IPs disponibles
+    local detected_ip=$(detect_best_ip)
+    local ips=()
+    
+    if command -v ip &> /dev/null; then
+        ips=($(ip addr show | grep -E "inet (192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)" | awk '{print $2}' | cut -d'/' -f1))
+    else
+        ips=($(powershell.exe -Command "Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.IPAddress -match '^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)'} | Select-Object -ExpandProperty IPAddress"))
+    fi
     
     if [ ${#ips[@]} -eq 0 ]; then
         echo "❌ No se encontraron IPs privadas válidas"
@@ -130,6 +312,7 @@ select_ip_interactive() {
     if [[ "$confirm" =~ ^[Yy]$ ]]; then
         docker swarm init --advertise-addr $SELECTED_IP
         echo "✅ Swarm inicializado exitosamente"
+        show_join_tokens
     fi
 }
 
@@ -152,14 +335,30 @@ main() {
             fi
             validate_ip $2
             ;;
+        "tokens")
+            show_join_tokens
+            ;;
+        "nodes")
+            manage_remote_nodes
+            ;;
+        "status")
+            local status=$(check_swarm_status)
+            echo "Estado del Swarm: $status"
+            if [ "$status" = "MANAGER" ]; then
+                docker node ls
+            fi
+            ;;
         *)
-            echo "Uso: $0 [auto|detect|interactive|validate]"
+            echo "Uso: $0 [auto|detect|interactive|validate|tokens|nodes|status]"
             echo ""
             echo "Opciones:"
             echo "  auto        - Detectar y usar automáticamente"
             echo "  detect      - Solo mostrar IPs detectadas"
             echo "  interactive - Seleccionar IP manualmente"
             echo "  validate    - Validar una IP específica"
+            echo "  tokens      - Mostrar tokens de unión"
+            echo "  nodes       - Gestionar nodos remotos"
+            echo "  status      - Mostrar estado del Swarm"
             exit 1
             ;;
     esac
