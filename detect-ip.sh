@@ -322,8 +322,8 @@ setup_dind_managers() {
     echo "================================="
     echo ""
     
-    print_warning "⚠️  ADVERTENCIA: DinD es solo para desarrollo/testing"
-    print_warning "     No usar en producción"
+    echo "⚠️  ADVERTENCIA: DinD es solo para desarrollo/testing"
+    echo "     No usar en producción"
     echo ""
     
     echo "¿Cuántos managers DinD quieres crear?"
