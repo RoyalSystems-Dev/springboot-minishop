@@ -43,7 +43,7 @@ services:
       - mini-shop-network
     # 🔥 CONFIGURACIÓN PARA SWARM
     deploy:
-      replicas: 3                    # 3 instancias de NATS
+      replicas: 1                    # instancias de NATS
       placement:
         constraints:
           - node.role == manager     # Solo en nodos manager
@@ -253,7 +253,7 @@ services:
       - mini-shop-network
     # 🔥 CONFIGURACIÓN PARA SWARM
     deploy:
-      replicas: 2                    # 2 instancias de Nginx
+      replicas: 1                    # instancias de Nginx
       placement:
         constraints:
           - node.role == manager     # Solo en nodos manager (entrada al cluster)
