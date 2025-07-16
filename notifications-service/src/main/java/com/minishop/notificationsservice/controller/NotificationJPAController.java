@@ -19,7 +19,7 @@ import java.util.Optional;
  * Muestra cómo usar JPA repository en lugar de in-memory
  */
 @RestController
-@RequestMapping("/api/notifications-jpa")
+@RequestMapping("/notifications-jpa")
 @CrossOrigin(origins = "*")
 public class NotificationJPAController {
 

@@ -15,7 +15,7 @@ import java.util.Map;
  * Controlador REST para el manejo de notificaciones
  */
 @RestController
-@RequestMapping("/api/notifications")
+@RequestMapping("/notifications")
 @CrossOrigin(origins = "*")
 public class NotificationController {
 

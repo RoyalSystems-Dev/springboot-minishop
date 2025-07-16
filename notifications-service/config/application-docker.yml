@@ -3,6 +3,11 @@ server:
   port: 8083
 
 spring:
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
   application:
     name: notifications-service
   web:
