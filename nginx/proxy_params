@@ -20,3 +20,13 @@ proxy_buffers 8 4k;
 proxy_http_version 1.1;
 proxy_set_header Upgrade $http_upgrade;
 proxy_set_header Connection "upgrade";
+
+# Disable proxy redirect
+proxy_redirect off;
+
+# Handle large client requests
+client_max_body_size 10M;
+
+# Compression
+gzip on;
+gzip_types text/plain application/json application/javascript text/css;
