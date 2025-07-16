@@ -162,7 +162,7 @@ show_info() {
     echo "🌐 Acceso a los servicios (Puerto 8088):"
     echo "  • Mini-Shop Portal:      http://localhost:8088"
     echo "  • Orders Service:        http://localhost:8088/orders-app"
-    echo "  • Products Service:      http://localhost:8088/products"
+    echo "  • Products Service:      http://localhost:8088/products-app"
     echo "  • Notifications Service: http://localhost:8088/notifications-app"
     echo "  • H2 Console:           http://localhost:8088/h2-console"
     echo "  • NATS Monitoring:      http://localhost:8423"

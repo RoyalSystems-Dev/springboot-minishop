@@ -123,6 +123,7 @@ services:
   # ========================================
   nginx:
     image: nginx:alpine
+    container_name: mini-shop-nginx
     ports:
       - "8088:80"  # Puerto fácil de cambiar
     volumes:

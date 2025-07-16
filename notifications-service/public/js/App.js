@@ -17,7 +17,7 @@ export default {
         const soundEnabled = ref(true);
 
         // API Base URL
-        const API_BASE = '/api/notifications';
+        const API_BASE = '/notifications';
 
         // Computed properties
         const filteredNotifications = computed(() => {
